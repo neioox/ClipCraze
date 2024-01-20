@@ -1,0 +1,41 @@
+package de.neiox.utls;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+public class getRequestHandler {
+
+    private String Auth = "Bearer lo46k4dvoadv1sn8ap3n7femk0pgw1";
+    private String CliendID = "a21zjh9htub57nqweuoe5ug197eodg";
+    public String getRequest(String url) {
+        try {
+            URL http = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) http.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Client-ID", CliendID);
+            con.setRequestProperty("Authorization", Auth);
+
+            int status = con.getResponseCode();
+            if (status == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String line;
+                StringBuilder response = new StringBuilder();
+
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+
+                reader.close(); // Close the reader when you're done with it.
+            
+                return response.toString();
+            }
+        } catch (IOException e) {
+            System.out.println(e);
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+}

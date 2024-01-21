@@ -6,8 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.neiox.utls.getRequestHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -18,7 +17,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@RestController
+
 
 public class getClips implements Runnable{
     // Get the current date and time

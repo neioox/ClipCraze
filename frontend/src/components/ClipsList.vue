@@ -73,6 +73,13 @@ const recieveclipList = async () => {
       const subExist = await subExists(clipName);
       subtitlesExist.value[clipName] = subExist;
     }));
+
+
+    
+    let subtitlesExistsResponse = await fetch("http://localhost:8080/api/checksubtitle/" + clipName);
+    let subtitlesExists = await subtitlesExistsResponse.json();
+
+    console.log(subtitlesExists)
   } catch (error) {
     console.error("Error fetching clips:", error);
   }

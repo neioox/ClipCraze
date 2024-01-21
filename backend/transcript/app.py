@@ -65,6 +65,8 @@ def convertclip2tt(filename):
     clips_path = "../Clips"
     input_file = os.path.join(clips_path, filename)
 
+
+
     try:
         output_file = os.path.join(clips_path, filename.replace(".mp4", "_w_subs.mp4"))
         subtitle_file = os.path.join("SrtFiles", filename + ".srt")

@@ -9,6 +9,10 @@ import stable_whisper
 from langchain.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler 
+import logging
+from flask import make_response
+#import pysubs2
+
 
 
 app = Flask(__name__)
@@ -16,19 +20,21 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
-whisper_model = "large-v3"
+
+whisper_model = "medium"
 ollama_model = "llama2-uncensored"
 
 print("Loading ai models...")
 print("Loading Whisper ai... model: "+ whisper_model)
-model = stable_whisper.load_model(whisper_model)  # Loading whisper model
+model =  stable_whisper.load_model(whisper_model)
 print("Whisper model loaded.")
 print("loading ollama model: "+ ollama_model)
 
 llm = Ollama(model= ollama_model, callback_manager= CallbackManager([StreamingStdOutCallbackHandler]))
 print("ollama model loaded")
 print("DONE!")
-
+logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 def success_response(message):
     return jsonify({"success": True, "message": message})
@@ -65,8 +71,6 @@ def convertclip2tt(filename):
     clips_path = "../Clips"
     input_file = os.path.join(clips_path, filename)
 
-
-
     try:
         output_file = os.path.join(clips_path, filename.replace(".mp4", "_w_subs.mp4"))
         subtitle_file = os.path.join("SrtFiles", filename + ".srt")
@@ -94,13 +98,25 @@ def convertclip2tt(filename):
     except Exception as e:
         return error_response(str(e))
 
+
 def transcribe_audio(path, name):
-  
+    logger.info('Transcription started for file: %s', path)
+    
     results = model.transcribe(audio=path)
 
-    stable_whisper.result_to_srt_vtt(result=results, segment_level= False , word_level= True, filepath =  os.path.join("SrtFiles", name + ".srt"))
+    if not path or not name or not os.path.isfile(path):
+        logger.error('Invalid path or name')
+        return make_response("Invalid path or name", 400)
+    
+    test =  stable_whisper.result_to_srt_vtt(result=results, segment_level=False, word_level=True, filepath=os.path.join("SrtFiles", name + ".srt"))
+    logger.info('Subtitles generated: %s', test)
+    print(test)
 
-    return "Subtitels generated"
+    return make_response("Subtitles generated", 200)
+
+
+
+
 
 
 
@@ -117,23 +133,27 @@ def generateText(topic):
 
 
 
+
 @app.route("/genSubtitle/<filename>", methods=["POST"])
 def generate_subtitle(filename):
+
+
     folder_path = "../Clips"
     file_path = os.path.join(folder_path, filename)
+    logger.info(f"File path: {file_path}")
 
     if os.path.exists(file_path):
         try:
-            print("File exists. Generating subtitles...")
+            logger.info("File exists. Generating subtitles...")
             transcribe_audio(file_path, filename)
-            print("Subtitles generated successfully.")
+            logger.info("Subtitles generated successfully.")
             return success_response("Subtitle generated")
         except Exception as e:
-            print(f"Error generating subtitles: {e}")
+            logger.error(f"Error generating subtitles: {e}")
             return error_response(str(e))
 
     else:
-        print("File not found.")
+        logger.error("File not found.")
         return error_response("File not found.")
 
 

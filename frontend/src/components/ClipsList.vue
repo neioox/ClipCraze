@@ -103,15 +103,12 @@ onMounted(() => {
 
 
 export const subExists = async (clipName) => {
-  try {
+ 
     const subtitelsExistsResponse = await fetch("http://localhost:8080/api/checksubtitle/" + clipName);
     const subtitelsExists = await subtitelsExistsResponse.json();
-    console.log(subtitelsExists.exists);
-    return subtitelsExists.exists === true;
-  } catch (error) {
-    console.error("Error checking subtitles:", error);
-    return false;
-  }
+    console.log(subtitelsExists);
+    return subtitelsExists.Exists;
+  
 };
 
 </script>

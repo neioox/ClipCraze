@@ -21,9 +21,6 @@ import java.util.stream.Stream;
 
 import static de.neiox.services.SubititelsEditor.editSubtitleSegment;
 
-
-
-
 public class WebService {
 
 
@@ -54,25 +51,33 @@ public class WebService {
 
         app.post("/api/crop4tiktok/{filename}", ctx ->{
             String filename = ctx.pathParam("filename");
-            aiService.convertclip2tt(filename);
+            String result = aiService.crop4tiktok(filename);
+            ctx.json(result);
         });
 
         app.post("/api/addsubtitles2vid/{filename}", ctx ->{
             String filename = ctx.pathParam("filename");
-            aiService.convertclip2tt(filename);
-
+            String result = aiService.convertclip2tt(filename);
+            ctx.json(result);
         });
-
 
         app.post("/api/generateText/{text}", ctx ->{
             String text = ctx.pathParam("text");
-            aiService.generateText(text);
+            String result = aiService.generateText(text);
+            ctx.json(result);
         });
 
         app.post("/api/genSubtitle/{filename}", ctx -> {
             String  filename = ctx.pathParam("filename");
-            aiService.generate_subtitle(filename);
+
+            try {
+                String result = aiService.generate_subtitle(filename);
+                ctx.json(result);
+            }catch (Exception e){
+                ctx.result("Error:"+ e);
+            }
         });
+
 
 
 
@@ -95,7 +100,25 @@ public class WebService {
 
         app.get("/api/checksubtitle/{clipname}", ctx -> {
             String clipName = ctx.pathParam("clipname");
-            Path subtitlePath = Paths.get("Clips/" + clipName + ".en.vtt");
+            Path subtitlePath = Paths.get("transcript/SrtFiles/" + clipName + ".srt"); // Make sure to add a slash before the clipName
+            System.out.println(subtitlePath);
+            String subtitleDirectory = subtitlePath.getParent().toString();
+            System.out.println("Subtitle directory: " + subtitleDirectory);
+
+            // Print all files in the subtitle directory
+            try (Stream<Path> paths = Files.list(Paths.get(subtitleDirectory))) {
+                System.out.println("Files in the directory:");
+                paths
+                        .filter(Files::isRegularFile)
+                        .forEach(file -> {
+                            System.out.println(file.getFileName());
+                        });
+            } catch (IOException e) {
+                e.printStackTrace();
+
+                System.out.println(e);
+            }
+
             Map<String, Boolean> response = new HashMap<>();
             if (Files.exists(subtitlePath)) {
                 response.put("Exists", true);

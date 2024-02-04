@@ -74,7 +74,9 @@ public class getClips implements Runnable{
             String url = "https://api.twitch.tv/helix/users?login=" + username;
 
             String userinfo = getRequestHandler.getRequest(url);
+            System.out.println(userinfo);
             JSONObject jsonResponse = new JSONObject(userinfo.toString());
+            System.out.println(jsonResponse);
 
             JSONArray dataArray = jsonResponse.getJSONArray("data");
             if (!dataArray.isEmpty()) {

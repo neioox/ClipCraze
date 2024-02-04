@@ -1,7 +1,5 @@
 package de.neiox.services;
 
-import scala.util.parsing.combinator.testing.Str;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;

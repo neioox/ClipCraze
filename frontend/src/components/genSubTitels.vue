@@ -25,25 +25,29 @@ async function generateSubtitles(event) {
             let subtitlesExistsResponse = await fetch("http://localhost:8080/api/checksubtitle/" + clipName);
             let subtitlesExists = await subtitlesExistsResponse.json();
 
-            subsExist.value = subtitlesExists;        
+            subsExist.value = subtitlesExists.Exists;        
 
             loadingState.value = "Response: " + subtitlesExists;
 
             responses.value.push(subtitlesExists); // Use .value to access the underlying value
-
+            console.log("test")
+            console.log(subsExist.value)
             //if subs don't exist generate them 
-            if (!subtitlesExists.exists) {
+           
+            if (!subsExist.value) {
                 loadingState.value = "Generating Subtitles with AI...";
                 // Generate subtitles 
                 const response = await fetch("http://localhost:8080/api/genSubtitle/" + clipName, {method:  "POST"
                 });
                 responses.value.push(await response.json()); // Use .value to access the underlying value
             } else {
+
+                console.log(subtitlesExist)
                 subtitlesExist = true;
 
                 loadingState.value = "Adding the Subtitles to the video..."
                 // Render it to a new video file 
-                const formattingConvertResponse = await fetch("http://localhost:8080/api/addsubtitles2vid/" + clipName);
+                const formattingConvertResponse = await fetch("http://localhost:8080/api/addsubtitles2vid/" + clipName , {method: "POST"});
                 responses.value.push(await formattingConvertResponse.json()); // Use .value to access the underlying value
 
                 loadingState.value = "Cropping it for TikTok..."

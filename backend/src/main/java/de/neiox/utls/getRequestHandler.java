@@ -8,7 +8,7 @@ import java.net.URL;
 
 public class getRequestHandler {
 
-    private String Auth = "Bearer lo46k4dvoadv1sn8ap3n7femk0pgw1";
+    private String Auth = "Bearer 6jgfltxrisraaybmefhgstjkkiuhel";
     private String CliendID = "a21zjh9htub57nqweuoe5ug197eodg";
     public String getRequest(String url) {
         try {
@@ -19,23 +19,30 @@ public class getRequestHandler {
             con.setRequestProperty("Authorization", Auth);
 
             int status = con.getResponseCode();
-            if (status == 200) {
+          //  if (status == 200) {
+
+
+                System.out.println(
+                        con.getResponseMessage());
+
                 BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
                 String line;
                 StringBuilder response = new StringBuilder();
 
                 while ((line = reader.readLine()) != null) {
                     response.append(line);
+                    System.out.println(line);
                 }
 
                 reader.close(); // Close the reader when you're done with it.
-            
+                System.out.println("Sex");
+                System.out.println(response);
                 return response.toString();
-            }
+         //   }
         } catch (IOException e) {
             System.out.println(e);
             throw new RuntimeException(e);
+
         }
-        return null;
     }
 }

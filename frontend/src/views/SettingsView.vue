@@ -78,11 +78,13 @@ const generateDescription = async () => {
   redirect: 'follow'
 };
 
-fetch("http://localhost:8080/api/generateText/Minecraft,%20Twitch,%20BastiGHG", requestOptions)
+fetch("http://localhost:8080/api/generateText/test", requestOptions)
   .then(response => response.text())
   .then(result => console.log(result))
   .catch(error => console.log('error', error));
 };
+
+
 
 
 
@@ -93,6 +95,7 @@ const editSubtitles = () => {
 
 onMounted(async () =>{
   checkSubtitle.value = await subExists(clipID);
+  console.log(checkSubtitle.value)
 });
 
 </script>

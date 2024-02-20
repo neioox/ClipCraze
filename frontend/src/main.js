@@ -5,7 +5,7 @@ import { createRouter, createWebHashHistory } from "vue-router"
 import SettingsView from '@/views/SettingsView.vue';
 
 import Home from "@/Home.vue"
-
+import './styles/app.css';
 
 
 const app = createApp(App)

@@ -83,7 +83,7 @@ async function generateSubtitles(event) {
 </script>
 
 <template>
-    <button @click="generateSubtitles" v-if="isLoading == false">Convert for Tiktok</button>
+    <button class=" bg-slate-600 text-white px-4 py-2 mt-2 " @click="generateSubtitles" v-if="isLoading == false">Convert for Tiktok</button>
     <p v-else v-text="loadingState"></p>
 
 </template>

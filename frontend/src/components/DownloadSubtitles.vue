@@ -1,5 +1,5 @@
 <template>
-<button @click="getdownloadLink">Download</button>
+<button  @click="getdownloadLink">Download</button>
 </template>
 
 

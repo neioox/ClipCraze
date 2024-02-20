@@ -1,45 +1,24 @@
 <template>
-  <div class="clip-container">
-    <div v-for="(clip, index) in clips" :key="index" class="clip-item">
-      <h2 v-text="clip"></h2>
+  <div class="flex flex-wrap pl-10">
+    <div v-for="(clip, index) in clips" :key="index" class="w-1/4 m-4">
+      <h2 class="text-xl, font-bold" v-text="clip"></h2>
       <div>
-        
-        <video width="500" height="300" :src="'http://localhost:8080/api/getclips/' + clip" controls></video>
+        <video class="w-500 h-300 rounded-lg" :src="'http://localhost:8080/api/getclips/' + clip" controls></video>
       </div>
-      <div v-if="subtitlesExist[clip] === true">
-
-      </div>
-
-        <button  @click='naviegateToSettings(clip)'> Settings</button>
-   
-
-      
+      <div v-if="subtitlesExist[clip] === true"></div>
+      <button @click='navigateToSettings(clip)' class=" bg-slate-700 text-white px-4 py-2 mt-2">Settings</button>
       <div v-if="subtitlesExist[clip] === false">
-        <genSubTitels :data-name="clip"></genSubTitels>
-        <p>Subtitles do not exist ❎</p>
+        <genSubTitles :data-name="clip"></genSubTitles>
+        <p class="text-red-400">Subtitles do not exist ❎</p>
       </div>
-      <p v-else-if="subtitlesExist[clip] === true">Subtitles exist ✅</p>
-      <p v-else>An error occurred while checking subtitles</p>
-
+      <p v-else-if="subtitlesExist[clip] === true" class="text-green-500">Subtitles exist ✅</p>
+      <p v-else class="text-red-500">An error occurred while checking subtitles</p>
       <DeleteClip :data-name="clip"></DeleteClip>
-
       <DownloadSubs v-if="subtitlesExist[clip] === true" :data-name="clip"></DownloadSubs>
     </div>
   </div>
 </template>
 
-<style scoped>
-.clip-container {
-  display: flex;
-  flex-wrap: wrap;
-  padding-left: 10px;
-}
-
-.clip-item {
-  flex: 0 0 calc(25% - 20px); /* Adjust the percentage as needed, and consider margins */
-  margin: 10px;
-}
-</style>
 
 <script setup>
 import genSubTitels from './genSubTitels.vue';
@@ -52,7 +31,7 @@ const clips = ref([]);
 const subtitlesExist = ref({});
 
 
-const naviegateToSettings = async (Clip) => {
+const navigateToSettings = async (Clip) => {
   try {
     await router.push({ name: 'SettingsView', params: { id: Clip } });
   } catch (error) {

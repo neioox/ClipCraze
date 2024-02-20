@@ -1,41 +1,46 @@
 <template>
   <div>
-    <h1>SETTINGS</h1>
+    <h1 class= "text-4xl font-bold ">Settings ⚙️</h1>
 
     <!-- Your other template code goes here -->
 
-    <h2>original</h2>
-    <video width="500" height="300" :src="'http://localhost:8080/api/getclips/' + clip" controls></video>
+    <div style="background-color: yellowgreen;">
+    
+    </div>
 
+    <h2 class="text-2xl font-bold">original</h2>
+    <div class="w-full flex justify-center"> <!-- Assuming a full-width container, adjust as needed -->
+    <video class="mx-auto rounded-lg" width="500" height="300" :src="'http://localhost:8080/api/getclips/' + clip" controls></video>
+</div>
     <div>
-      <h2>With subtitles</h2>
+      <h2 class=" text-xl font-bold">With subtitles</h2>
       <video v-if="checkSubtitle == true" width="500" height="300" :src="'http://localhost:8080/api/getclips/' + clipWithSubs" controls></video>
       <p v-else>Does not exist yet</p>
 
-      <h2>Cropped for Short Videos</h2>
+      <h2 class=" text-xl font-bold">Cropped for Short Videos</h2>
       <video v-if="checkSubtitle == true" width="500" height="300" :src="'http://localhost:8080/api/getclips/' + shortClip" controls></video>
       <p v-else>Does not exist yet</p>
     </div>
 
     <div>
       <GenSubTitels :data-name="clipID"></GenSubTitels>
+   
+      <button class="bg-slate-600 text-white px-4 py-2 mt-2" @click="generateDescription">Generate description</button>
+     <button class="bg-slate-600 text-white px-4 py-2 mt-2" @click="editSubtitles">Edit Subtitles</button>
     </div>
 
-    <button @click="generateDescription">Generate description</button>
-    <button @click="editSubtitles">Edit Subtitles</button>
+   
     <div>
-      <textarea v-model="description">
-        Sample description
-      </textarea>
+      <textarea class="" v-model="desc"> </textarea>
     </div>
-    <button @click="recommendHashtags">Recommend hashtags</button>
+    <button class="bg-slate-600 text-white px-4 py-2 mt-2" @click="recommendHashtags">Recommend hashtags</button>
     <div>
       <textarea v-model="hashtags">
         #test #sample
       </textarea>
     </div>
 
-    <button class="back" @click="back2Home">Back</button>
+    <button class="bg-red-600 text-white px-4 py-2 mt-2" @click="back2Home">Back</button>
   </div>
 
   
@@ -58,10 +63,10 @@ const clipID = useRoute().params.id;
 const clip = ref(clipID);
 const clipWithSubs = ref(clipID.replace('.mp4', '_w_subs.mp4'));
 const shortClip = ref(clipID.replace('.mp4', '_w_subs_4_tiktok.mp4'));
-
+const desc  = ref("")
 const checkSubtitle = ref();
 
-const description = ref('Sample description');
+
 
 const back2Home = async () => {
   try {
@@ -79,10 +84,14 @@ const generateDescription = async () => {
 };
 
 fetch("http://localhost:8080/api/generateText/test", requestOptions)
-  .then(response => response.text())
-  .then(result => console.log(result))
+  .then(response => response.json())
+  .then(result => {
+    desc.value = result.description
+    console.log("test");
+    console.log(desc.value);
+  })
   .catch(error => console.log('error', error));
-};
+}
 
 
 

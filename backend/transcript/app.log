@@ -1,106 +1,13 @@
 werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on http://127.0.0.1:5000
 werkzeug - INFO - [33mPress CTRL+C to quit[0m
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2024 15:59:51] "POST /genSubtitle/Trymacs22024-02-04T.mp4 HTTP/1.1" 200 -
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2024 16:00:46] "POST /addsubtitles2vid/Trymacs22024-02-04T.mp4 HTTP/1.1" 200 -
-py.warnings - WARNING - C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\moviepy\video\io\ffmpeg_reader.py:123: UserWarning: Warning: in file ../Clips\Trymacs22024-02-04T_w_subs.mp4, 6220800 bytes wanted but 0 bytes read,at frame 1554/1556, at time 25.90/25.92 sec. Using the last valid frame instead.
-  warnings.warn("Warning: in file %s, "%(self.filename)+
-
-py.warnings - WARNING - C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\moviepy\video\io\ffmpeg_reader.py:123: UserWarning: Warning: in file ../Clips\Trymacs22024-02-04T_w_subs.mp4, 6220800 bytes wanted but 0 bytes read,at frame 1555/1556, at time 25.92/25.92 sec. Using the last valid frame instead.
-  warnings.warn("Warning: in file %s, "%(self.filename)+
-
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2024 16:01:06] "POST /crop4tiktok/Trymacs22024-02-04T_w_subs.mp4 HTTP/1.1" 200 -
-py.warnings - WARNING - C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_core\_api\deprecation.py:189: LangChainDeprecationWarning: The function `__call__` was deprecated in LangChain 0.1.7 and will be removed in 0.2.0. Use invoke instead.
+py.warnings - WARNING - /home/neiox/.local/lib/python3.10/site-packages/langchain_core/_api/deprecation.py:117: LangChainDeprecationWarning: The function `__call__` was deprecated in LangChain 0.1.7 and will be removed in 0.2.0. Use invoke instead.
   warn_deprecated(
 
-app - ERROR - Exception on /generateText/test [POST]
-Traceback (most recent call last):
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\connection.py", line 174, in _new_conn
-    conn = connection.create_connection(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\util\connection.py", line 95, in create_connection
-    raise err
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\util\connection.py", line 85, in create_connection
-    sock.connect(sa)
-ConnectionRefusedError: [WinError 10061] Es konnte keine Verbindung hergestellt werden, da der Zielcomputer die Verbindung verweigerte
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\connectionpool.py", line 703, in urlopen
-    httplib_response = self._make_request(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\connectionpool.py", line 398, in _make_request
-    conn.request(method, url, **httplib_request_kw)
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\connection.py", line 239, in request
-    super(HTTPConnection, self).request(method, url, body=body, headers=headers)
-  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\http\client.py", line 1283, in request
-    self._send_request(method, url, body, headers, encode_chunked)
-  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\http\client.py", line 1329, in _send_request
-    self.endheaders(body, encode_chunked=encode_chunked)
-  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\http\client.py", line 1278, in endheaders
-    self._send_output(message_body, encode_chunked=encode_chunked)
-  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\http\client.py", line 1038, in _send_output
-    self.send(msg)
-  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\http\client.py", line 976, in send
-    self.connect()
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\connection.py", line 205, in connect
-    conn = self._new_conn()
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\connection.py", line 186, in _new_conn
-    raise NewConnectionError(
-urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x00000234258C3AF0>: Failed to establish a new connection: [WinError 10061] Es konnte keine Verbindung hergestellt werden, da der Zielcomputer die Verbindung verweigerte
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\requests\adapters.py", line 489, in send
-    resp = conn.urlopen(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\connectionpool.py", line 787, in urlopen
-    retries = retries.increment(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\urllib3\util\retry.py", line 592, in increment
-    raise MaxRetryError(_pool, url, error or ResponseError(cause))
-urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/generate/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000234258C3AF0>: Failed to establish a new connection: [WinError 10061] Es konnte keine Verbindung hergestellt werden, da der Zielcomputer die Verbindung verweigerte'))
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\flask\app.py", line 2528, in wsgi_app
-    response = self.full_dispatch_request()
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\flask\app.py", line 1825, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\flask_cors\extension.py", line 165, in wrapped_function
-    return cors_after_request(app.make_response(f(*args, **kwargs)))
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\flask\app.py", line 1823, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\flask\app.py", line 1799, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
-  File "C:\Users\Platz\OneDrive\yt musik\Dokumente\GitHub\ClipCraze\backend\transcript\app.py", line 129, in generateText
-    response = llm(prompt)
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_core\_api\deprecation.py", line 211, in warning_emitting_wrapper
-    return wrapped(*args, **kwargs)
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_core\language_models\llms.py", line 948, in __call__
-    self.generate(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_core\language_models\llms.py", line 698, in generate
-    output = self._generate_helper(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_core\language_models\llms.py", line 562, in _generate_helper
-    raise e
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_core\language_models\llms.py", line 549, in _generate_helper
-    self._generate(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_community\llms\ollama.py", line 389, in _generate
-    final_chunk = super()._stream_with_aggregation(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_community\llms\ollama.py", line 298, in _stream_with_aggregation
-    for stream_resp in self._create_generate_stream(prompt, stop, **kwargs):
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_community\llms\ollama.py", line 148, in _create_generate_stream
-    yield from self._create_stream(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\langchain_community\llms\ollama.py", line 208, in _create_stream
-    response = requests.post(
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\requests\api.py", line 115, in post
-    return request("post", url, data=data, json=json, **kwargs)
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\requests\api.py", line 59, in request
-    return session.request(method=method, url=url, **kwargs)
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\requests\sessions.py", line 587, in request
-    resp = self.send(prep, **send_kwargs)
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\requests\sessions.py", line 701, in send
-    r = adapter.send(request, **kwargs)
-  File "C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\requests\adapters.py", line 565, in send
-    raise ConnectionError(e, request=request)
-requests.exceptions.ConnectionError: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/generate/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000234258C3AF0>: Failed to establish a new connection: [WinError 10061] Es konnte keine Verbindung hergestellt werden, da der Zielcomputer die Verbindung verweigerte'))
-werkzeug - INFO - 127.0.0.1 - - [04/Feb/2024 16:02:44] "[35m[1mPOST /generateText/test HTTP/1.1[0m" 500 -
+werkzeug - INFO - 127.0.0.1 - - [16/Feb/2024 13:53:56] "POST /generateText/test HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [16/Feb/2024 13:54:32] "POST /generateText/test HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [16/Feb/2024 13:55:05] "POST /generateText/test HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [16/Feb/2024 14:03:01] "POST /generateText/test HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [16/Feb/2024 14:03:30] "POST /generateText/test HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [16/Feb/2024 14:04:51] "POST /generateText/test HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [16/Feb/2024 14:05:38] "POST /generateText/test HTTP/1.1" 200 -

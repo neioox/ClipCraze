@@ -49,9 +49,12 @@ public class WebService {
     public void register() {
 
 
-        app.post("/api/crop4tiktok/{filename}", ctx ->{
+        app.post("/api/crop4tiktok/{filename}/{format}", ctx ->{
             String filename = ctx.pathParam("filename");
-            String result = aiService.crop4tiktok(filename);
+            String format = ctx.pathParam("format");
+
+            System.out.println(format);
+            String result = aiService.crop4tiktok(filename, format);
             ctx.json(result);
         });
 

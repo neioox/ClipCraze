@@ -51,7 +51,7 @@ async function generateSubtitles(event) {
                 responses.value.push(await formattingConvertResponse.json()); // Use .value to access the underlying value
 
                 loadingState.value = "Cropping it for TikTok..."
-                const Convert4Tiktok = await fetch("http://localhost:8080/api/crop4tiktok/" + clipName.replace(".mp4", "_w_subs.mp4"), {method: "POST"});
+                const Convert4Tiktok = await fetch("http://localhost:8080/api/crop4tiktok/" + clipName.replace(".mp4", "_w_subs.mp4")+ "/uncropped", {method: "POST"});
                 responses.value.push(await Convert4Tiktok.json()); // Use .value to access the underlying value
 
                 loadingState.value = "Done!"

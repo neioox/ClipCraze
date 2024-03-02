@@ -11,8 +11,8 @@ public class AIService {
 
         private static final String BASE_URL = "http://localhost:5000";
 
-        public String crop4tiktok(String filename) throws Exception {
-            return sendPostRequest("/crop4tiktok/" + filename);
+        public String crop4tiktok(String filename, String  format ) throws Exception {
+            return sendPostRequest("/crop4tiktok/" + filename + "/"+ format);
         }
 
         public String convertclip2tt(String filename) throws Exception {
@@ -48,7 +48,4 @@ public class AIService {
 
             return content.toString();
         }
-
-
-
 }

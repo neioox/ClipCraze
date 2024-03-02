@@ -5,16 +5,15 @@ from flask_cors import CORS
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 from moviepy.video.tools.subtitles import SubtitlesClip
 from moviepy.video.fx.all import crop
+from moviepy.editor import *
 import stable_whisper
 from langchain.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler 
 import logging
-from flask import make_response
-#import pysubs2
+from modules.faceDetection import get_face_position
 
-
-
+from skimage.filters import gaussian
 app = Flask(__name__)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -43,27 +42,81 @@ def success_response(message):
 def error_response(message):
     return jsonify({"success": False, "error": message})
 
+def blur(image):
+    """ Returns a blurred (radius=2 pixels) version of the image """
+    return gaussian(image.astype(float), sigma=5)
 
-@app.route("/crop4tiktok/<filename>", methods=["POST"])
-def crop4tiktok(filename):
+
+@app.route("/crop4tiktok/<filename>/<format>", methods=["POST"])
+def crop4tiktok(filename, format):
+    print("Entering crop4tiktok function")
     clips_path = "../Clips"
     input_file = os.path.join(clips_path, filename)
+    print(f"Input file: {input_file}")
+    
+    if format == "cropped":
+        print("Format is cropped")
+        try:
 
-    try:
-        clip = VideoFileClip(input_file)
-        (w, h) = clip.size
+            clip = VideoFileClip(input_file)
+            print("Clip created")
+            (w, h) = clip.size
+            print(f"Clip size: {w}x{h}")
+            crop_width = h * 9 / 16
+            x1, x2 = (w - crop_width) // 2, (w + crop_width) // 2
+            y1, y2 = 0, h
+            print(f"Crop dimensions: x1={x1}, y1={y1}, x2={x2}, y2={y2}")
+            cropped_clip = crop(clip, x1=x1, y1=y1, x2=x2, y2=y2)
+            print("Clip cropped")
 
-        crop_width = h * 9 / 16
-        x1, x2 = (w - crop_width) // 2, (w + crop_width) // 2
-        y1, y2 = 0, h
-        cropped_clip = crop(clip, x1=x1, y1=y1, x2=x2, y2=y2)
+            output_file = os.path.join(clips_path, filename.replace(".mp4", "_4_tiktok.mp4"))
+            print(f"Output file: {output_file}")
+            cropped_clip.write_videofile(output_file)
+            print("Cropped video written")
 
-        output_file = os.path.join(clips_path, filename.replace(".mp4", "_4_tiktok.mp4"))
-        cropped_clip.write_videofile(output_file)
+            return success_response("Cropped video for TikTok")
+        
+        except Exception as e:
+            print(f"Exception occurred: {str(e)}")
+            return error_response(str(e))
+    
+    elif format == "uncropped":
+        print("Format is uncropped")
+        try:
+            clip = VideoFileClip(input_file)
+            repositiond_clip = clip.resize(0.35)
+            
+            
+            print("Clip created")
+            (w, h) = clip.size
+            print(f"Clip size: {w}x{h}")
+            crop_width = h * 9 / 16
+            x1, x2 = (w - crop_width) // 2, (w + crop_width) // 2
+            y1, y2 = 0, h
+            print(f"Crop dimensions: x1={x1}, y1={y1}, x2={x2}, y2={y2}")
+           
+       
+            print("Clip cropped")
+            
+            blurred_clip = clip.fl_image(blur)  # Adjust the blur intensity as needed
+            print("Clip blurred")
+            blurred_clip = crop(blurred_clip, x1=x1, y1=y1, x2=x2, y2=y2)  
+            print("Blurred clip resized")
 
-        return success_response("Cropped video for TikTok")
-    except Exception as e:
-        return error_response(str(e))
+            final_clip = CompositeVideoClip([blurred_clip, repositiond_clip.set_position("center")])
+            print("Final clip composed")
+
+            output_file = os.path.join(clips_path, filename.replace(".mp4", "_4_tiktok_uncropped.mp4"))
+            print(f"Output file: {output_file}")
+            final_clip.write_videofile(output_file)
+            print("Uncropped video written")
+
+            return success_response("Uncropped video for TikTok")
+        except Exception as e: 
+            print(f"Exception occurred: {str(e)}")
+            return error_response(str(e))
+    
+        
 
 
 @app.route("/addsubtitles2vid/<filename>", methods=["GET", "POST"])
@@ -144,6 +197,7 @@ def generate_subtitle(filename):
 
     if os.path.exists(file_path):
         try:
+            #get_face_position(file_path)
             logger.info("File exists. Generating subtitles...")
             transcribe_audio(file_path, filename)
             logger.info("Subtitles generated successfully.")

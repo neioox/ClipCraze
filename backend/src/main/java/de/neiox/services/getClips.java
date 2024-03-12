@@ -3,7 +3,7 @@ package de.neiox.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.neiox.utls.getRequestHandler;
+import de.neiox.utls.requestHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -36,7 +36,7 @@ public class getClips implements Runnable{
     String formattedDateTime = now.format(formatter);
 
     String url = "";
-    getRequestHandler getRequestHandler = new getRequestHandler();
+    requestHandler requestHandler = new requestHandler();
 
     public JsonNode parseStreamersJson() {
 
@@ -73,7 +73,7 @@ public class getClips implements Runnable{
             String username = element.toString().toLowerCase(Locale.ROOT).replace("\"", "");
             String url = "https://api.twitch.tv/helix/users?login=" + username;
 
-            String userinfo = getRequestHandler.getRequest(url);
+            String userinfo = requestHandler.getRequest(url);
             System.out.println(userinfo);
             JSONObject jsonResponse = new JSONObject(userinfo.toString());
             System.out.println(jsonResponse);
@@ -85,7 +85,7 @@ public class getClips implements Runnable{
                 String user_id = dataObject.getString("id");
 
                 //get top clips of last 24h
-                String topClips = getRequestHandler.getRequest("https://api.twitch.tv/helix/clips?broadcaster_id=" + user_id + "&first=5&started_at="+formattedLastWeek+"00:00:00.00Z&first=5");
+                String topClips = requestHandler.getRequest("https://api.twitch.tv/helix/clips?broadcaster_id=" + user_id + "&first=5&started_at="+formattedLastWeek+"00:00:00.00Z&first=5");
 
 
                 if (topClips != null) {
@@ -114,7 +114,7 @@ public class getClips implements Runnable{
     public void downloadClip(String clipUrl, int id){
 
         try {
-            String getAsset = getRequestHandler.getRequest("https://api.efuse.gg/api/sidekick/twitch-clip?url="+ clipUrl);
+            String getAsset = requestHandler.getRequest("https://api.efuse.gg/api/sidekick/twitch-clip?url="+ clipUrl);
             JSONObject jsonResponse = new JSONObject(getAsset);
             // Create a connection to the clip URL
             String mp4URL = jsonResponse.getString("mp4_url");
@@ -161,9 +161,6 @@ public class getClips implements Runnable{
     }
 
     public void checkIfSubTitelsExists(String Path){
-
-
-
 
 
 

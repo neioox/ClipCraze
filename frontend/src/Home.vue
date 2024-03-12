@@ -8,6 +8,7 @@
     <ClipsList></ClipsList>
     <ReceiveClips></ReceiveClips>
      <router-view></router-view>
+
     
   </div>
 
@@ -18,7 +19,7 @@
 // Import your components
 import ClipsList from './components/ClipsList.vue';
 import ReceiveClips from './components/ReceiveClips.vue';
-
+import Login from './views/Login.vue';
 
 
 </script>
@@ -29,6 +30,7 @@ export default {
   components: {
     ReceiveClips,
     ClipsList,
+    Login
     
   }
 };

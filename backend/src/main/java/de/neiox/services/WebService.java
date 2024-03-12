@@ -3,7 +3,10 @@ package de.neiox.services;
 import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
 import com.fasterxml.jackson.databind.JsonNode;
+import de.neiox.services.Auth.Auth;
+import de.neiox.services.database.MongoDB;
 import io.javalin.Javalin;
+import org.eclipse.jetty.server.Authentication;
 import org.json.JSONObject;
 
 
@@ -11,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,12 +23,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
+import static de.neiox.Main.mongoDB;
 import static de.neiox.services.SubititelsEditor.editSubtitleSegment;
 
 public class WebService {
 
 
     AIService aiService = new AIService();
+
+    Auth auth = new Auth();
 
     private final Javalin app;
 
@@ -235,6 +242,156 @@ public class WebService {
                 ctx.result("{\"response\": " + e.getMessage() + "}");
             }
         });
+
+
+
+
+        app.post("/api/validate/login", ctx ->{
+
+            String Username = ctx.formParam("username");
+            String Password = ctx.formParam("password");
+
+            try{
+                Boolean result =  mongoDB.validateuser(Username, Password);
+
+                if (result){
+
+
+
+                     auth.generateToken();
+                     String token = auth.getToken();
+                    ctx.result("{\"response\":"+  result + ", \"token\": \"" + token + "\"}");
+
+                }else {
+                    ctx.result("{\"response\":"+  result + "}");
+
+                }
+
+
+            }catch (Exception e){
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+
+
+
+        app.post("/api/checkToken", ctx -> {
+            String token = ctx.formParam("token");
+
+            try {
+                Boolean result = auth.checkToken(token);
+
+                if (result) {
+                    ctx.result("{\"response\": \"Token ist gültig\"}");
+                } else {
+                    ctx.result("{\"response\": \"Token ist ungültig\"}");
+                }
+
+            } catch (Exception e) {
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+
+
+
+        app.post("/api/addUser/", ctx ->{
+            String Username = ctx.formParam("username");
+            String Password = ctx.formParam("password");
+            String Group = ctx.formParam("group");
+
+            try{
+                System.out.println(Username);
+                String result = mongoDB.createUser(Username, Password, Group);
+                switch (result){
+                    case "inserted user!":
+
+                        ctx.result("{\"response\": Inserted User "+ Username +  Password + "}");
+                        break;
+
+                    case "user exists":
+
+                        ctx.status(500).result("{\"error\": \"User exists! \"}");
+                        break;
+
+                }
+
+            }catch (Exception e){
+
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+
+
+
+
+        app.post("/api/addClip/", ctx ->{
+            String Name = ctx.queryParam("Name");
+
+            int ttl = Integer.parseInt(ctx.queryParam("ttl"));
+            String streamer =  ctx.pathParam("Streamer");
+            String duration = ctx.pathParam("Duration");
+            String filename = ctx.pathParam("filename");
+
+            try{
+
+                mongoDB.createClip(Name, ttl, streamer, duration, filename);
+                ctx.result("{\"response\": Inserted Clip "+ Name + "}");
+            }catch (Exception e){
+
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+
+
+        app.get("/api/get/all/Users/", ctx ->{
+
+            try{
+
+             String  result = mongoDB.getAllUsers().toString();
+
+                ctx.result("{\"response\": "+ result + "}");
+            }catch (Exception e){
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+
+            }
+        });
+
+
+        app.get("/api/get/all/Clips/", ctx ->{
+
+            try{
+
+                String  result = mongoDB.getAllClips().toString();
+
+                ctx.result("{\"response\": "+ result + "}");
+            }catch (Exception e){
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+
+            }
+        });
+
+
+        app.post("/api/addStreamer/", ctx ->{
+            String Name = ctx.queryParam("Name");
+            String assignedUser = ctx.queryParam("assignedUser");
+
+            try{
+                mongoDB.createStreamer(Name, assignedUser);
+                ctx.result("{\"response\": \"Inserted Streamer "+ Name + "\"}");
+            }catch (Exception e){
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+
+        app.get("/api/get/all/Streamers/", ctx ->{
+            try{
+                String  result = mongoDB.getAllStreamers().toString();
+                ctx.result("{\"response\": "+ result + "}");
+            }catch (Exception e){
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+
 
         app.get("/api/translate/", ctx -> {
             String text = ctx.queryParam("text");

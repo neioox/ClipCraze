@@ -3,10 +3,11 @@ package de.neiox.utls;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class getRequestHandler {
+public class requestHandler {
 
     private String Auth = "Bearer 6jgfltxrisraaybmefhgstjkkiuhel";
     private String CliendID = "a21zjh9htub57nqweuoe5ug197eodg";
@@ -45,4 +46,9 @@ public class getRequestHandler {
 
         }
     }
+
+
+
+
+
 }

@@ -1,5 +1,5 @@
 <script setup>
-;import { ref } from 'vue';
+import { ref } from 'vue';
 
 const LoadingState = ref(false)
 
@@ -10,9 +10,24 @@ async function receiveClips() {
   try {
     LoadingState.value = true;
 
-    const response = await fetch("http://localhost:8080/api/requestClips");
-    const data = await response;
-    // Handle the response data as needed
+    // Get the formParam id from local storage
+        const userid = localStorage.getItem('userid');
+
+
+
+
+        const formData = new FormData();
+        formData.append('id', userid);
+
+        console.log(userid)
+
+
+    const response = await fetch("http://localhost:8080/api/requestClips", {
+      method: 'POST',
+      body: formData, 
+    });
+
+    const data = await response.json(); 
     console.log(data);
     LoadingState.value = false;
   } catch (error) {
@@ -20,6 +35,7 @@ async function receiveClips() {
     LoadingState.value = false;
   }
 }
+
 </script>
 
 <template>

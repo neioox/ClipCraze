@@ -29,8 +29,6 @@ public class AIService {
             return sendPostRequest("/genSubtitle/" + filename);
         }
 
-
-
         private String sendPostRequest(String endpoint) throws Exception {
             URL url = new URL(BASE_URL + endpoint);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();

@@ -4,9 +4,8 @@ import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.neiox.services.Auth.Auth;
-import de.neiox.services.database.MongoDB;
 import io.javalin.Javalin;
-import org.eclipse.jetty.server.Authentication;
+import org.bson.Document;
 import org.json.JSONObject;
 
 
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +23,9 @@ import java.util.stream.Stream;
 
 import static de.neiox.Main.mongoDB;
 import static de.neiox.services.SubititelsEditor.editSubtitleSegment;
+
+
+//TODO: Check for every request the token
 
 public class WebService {
 
@@ -91,15 +92,21 @@ public class WebService {
 
 
 
-        app.get("/api/requestClips", ctx -> {
+        app.post("/api/requestClips", ctx -> {
+
+            String id = ctx.formParam("id");
+            System.out.println("TEST!!!!!");
+            System.out.println(id);
             getClips getClips = new getClips();
-            JsonNode streamers = getClips.parseStreamersJson();
-            getClips.requestClips(streamers);
+
+            getClips.requestClips(id);
             ctx.result("Downloaded all clips of today!");
         });
 
         app.get("/api/clips", ctx -> {
             Path dir = Paths.get("Clips");
+
+            System.out.println("SEX "+ dir);
             List<String> videos = Files.list(dir)
                     .filter(path -> !path.getFileName().toString().contains("w_subs"))
                     .map(Path::getFileName)
@@ -247,7 +254,6 @@ public class WebService {
 
 
         app.post("/api/validate/login", ctx ->{
-
             String Username = ctx.formParam("username");
             String Password = ctx.formParam("password");
 
@@ -255,23 +261,21 @@ public class WebService {
                 Boolean result =  mongoDB.validateuser(Username, Password);
 
                 if (result){
+                    Document userDoc = mongoDB.getUserByUserName(Username);
+                    String  userID  = userDoc.get("_id").toString();
+                    System.out.println(userID);
 
-
-
-                     auth.generateToken();
-                     String token = auth.getToken();
-                    ctx.result("{\"response\":"+  result + ", \"token\": \"" + token + "\"}");
-
-                }else {
+                    auth.generateToken();
+                    String token = auth.getToken();
+                    ctx.result("{\"response\":"+  result + ", \"userID\": \"" + userID + "\", \"token\": \"" + token + "\"}");
+                } else {
                     ctx.result("{\"response\":"+  result + "}");
-
                 }
-
-
-            }catch (Exception e){
+            } catch (Exception e){
                 ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
             }
         });
+
 
 
 
@@ -305,7 +309,7 @@ public class WebService {
                 switch (result){
                     case "inserted user!":
 
-                        ctx.result("{\"response\": Inserted User "+ Username +  Password + "}");
+                        ctx.result("{\"response\": \"Inserted User " + Username + "\"}");
                         break;
 
                     case "user exists":
@@ -371,9 +375,50 @@ public class WebService {
         });
 
 
+
+        app.post("/api/addSchedule/", ctx ->{
+            String Date = ctx.formParam("Days");
+            String Time = ctx.formParam("Time");
+            String assignedUser = ctx.formParam("assigneduser");
+
+            System.out.println(Date+ Time);
+
+            try{
+                mongoDB.createSettings(Date, Time, assignedUser);
+                ctx.result("{\"response\": \"Inserted "+ Date  + "\"}");
+            }catch (Exception e){
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+
+
+
+
+        app.post("/api/get/schedule", ctx -> {
+            String id = ctx.formParam("id");
+
+
+            try{
+
+                List<String> schedules = mongoDB.getSettingsFromUser(id);
+
+
+                ctx.result("{\"schedules\": "+ schedules + "}");
+            }catch (Exception e ){
+
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+
+            }
+        });
+
+
+
+        //Streamer section
+
         app.post("/api/addStreamer/", ctx ->{
-            String Name = ctx.queryParam("Name");
-            String assignedUser = ctx.queryParam("assignedUser");
+            String Name = ctx.formParam("name");
+            String assignedUser = ctx.formParam("assigneduser");
+
 
             try{
                 mongoDB.createStreamer(Name, assignedUser);
@@ -392,6 +437,41 @@ public class WebService {
             }
         });
 
+
+
+        app.delete("/api/delete/streamer", ctx -> {
+           String id = ctx.formParam("id");
+           String StreamerName = ctx.formParam("streamername");
+
+
+           try{
+
+               mongoDB.deleteStreamer(StreamerName, id);
+               ctx.result("{\"response\": Deleted Streamer!}");
+
+           }catch (Exception e){
+
+               ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+
+           }
+        });
+
+        app.post("/api/get/streamer", ctx -> {
+            String id = ctx.formParam("id");
+
+
+            try{
+
+               List<String> streamers = mongoDB.getStreamersFromUser(id);
+
+
+               ctx.result("{\"streamers\": "+ streamers + "}");
+           }catch (Exception e ){
+
+               ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+
+           }
+        });
 
         app.get("/api/translate/", ctx -> {
             String text = ctx.queryParam("text");

@@ -6,17 +6,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.neiox.utls.requestHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import scala.util.parsing.combinator.testing.Str;
 
+import static de.neiox.Main.mongoDB;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+import java.util.stream.Collectors;
 
 
 public class getClips implements Runnable{
@@ -67,11 +74,18 @@ public class getClips implements Runnable{
     }
 
 
-    public void requestClips(JsonNode bcid) {
-        for (JsonNode element : bcid) {
+    public void requestClips(String id) {
 
-            String username = element.toString().toLowerCase(Locale.ROOT).replace("\"", "");
+      List<String> streamers =   mongoDB.getStreamersNameFromUser(id);
+
+      System.out.println(streamers);
+
+
+        for (String element : streamers) {
+
+            String username = element.toLowerCase(Locale.ROOT).replace("\"", "");
             String url = "https://api.twitch.tv/helix/users?login=" + username;
+            System.out.println(url);
 
             String userinfo = requestHandler.getRequest(url);
             System.out.println(userinfo);
@@ -100,7 +114,7 @@ public class getClips implements Runnable{
                         int finalI = i;
 
                         //download clips as thread
-                        executorService.submit(() -> downloadClip(clipurl, finalI));
+                        executorService.submit(() -> downloadClip(clipurl, finalI, id));
                     }
 
                     executorService.shutdown();
@@ -111,7 +125,30 @@ public class getClips implements Runnable{
 
 
 
-    public void downloadClip(String clipUrl, int id){
+
+    public String getRandomClipFromUser(String id) throws IOException {
+        List<String> clips = getAllClipsFromUser(id);
+        if (clips.isEmpty()) {
+            return null; // No clips found for the user
+        }
+        Random random = new Random();
+        int randomIndex = random.nextInt(clips.size());
+        return clips.get(randomIndex);
+    }
+
+     public List<String> getAllClipsFromUser(String id) throws IOException {
+         Path dir = Paths.get("Clips");
+         List<String> Clips = Files.list(dir)
+                 .filter(path -> !path.getFileName().toString().contains("w_subs") || path.getFileName().toString().contains(id))
+                 .map(Path::getFileName)
+                 .map(Path::toString)
+                 .collect(Collectors.toList());
+         return Clips;
+     }
+
+
+
+    private void downloadClip(String clipUrl, int id, String userID){
 
         try {
             String getAsset = requestHandler.getRequest("https://api.efuse.gg/api/sidekick/twitch-clip?url="+ clipUrl);
@@ -130,7 +167,7 @@ public class getClips implements Runnable{
             // Get the input stream for the clip
             InputStream inputStream = connection.getInputStream();
             // Determine the file name from the URL (you can customize this)
-            String fileName = clipTitle+ id + formattedDateTime +   ".mp4";
+            String fileName = clipTitle +"_"+  id +"_" + formattedDateTime + "_" +userID+   ".mp4";
 
             File targetDir=new File("Clips");
 

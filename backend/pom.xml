@@ -43,7 +43,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.8.2</version>
+            <version>5.0.1</version>
         </dependency>
 
         <dependency>
@@ -117,7 +117,7 @@
     </build>
     <repositories>
         <repository>
-            <id/>
+            <id>central</id>
             <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
     </repositories>

@@ -1,12 +1,16 @@
 package de.neiox.services.database;
 
+import com.mongodb.Block;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
 
 public class MongoDB {
 
@@ -22,12 +26,16 @@ public class MongoDB {
                     !collectionExist("Users") &&
                             !collectionExist("Clips") &&
                             !collectionExist("Streamers") &&
-                            !collectionExist("Settings")){
+                            !collectionExist("Settings")  &&
+                            !collectionExist("Schedules"))
+
+            {
                 System.out.println("Creating Tables...");
                 createCollection("Users");
                 createCollection("Clips");
                 createCollection("Streamers");
                 createCollection("Settings");
+                createCollection("Schedules");
                 System.out.println("done!");
             } else {
                 System.out.println("Tables do exist!");
@@ -44,6 +52,9 @@ public class MongoDB {
     public void createCollection(String collectionName){
         db.createCollection(collectionName);
     }
+
+
+
 
 
 
@@ -123,13 +134,60 @@ public class MongoDB {
                 collection.insertOne(doc);
     }
 
-    public void createSettings(String Shedule, String assignedUser){
+    public void createSettings(String days, String time, String assignedUser) {
+        try {
+            String[] dayParts = days.split(", ");
+            String[] timeParts = time.split(", ");
 
-        MongoCollection<Document> collection = db.getCollection("Streamers");
-        Document doc = new Document("Shedule", Shedule)
-                .append("assigend", assignedUser);
 
-        collection.insertOne(doc);
+
+            // Convert arrays to lists
+            List<String> dayList = Arrays.asList(dayParts);
+            List<String> timeList = Arrays.asList(timeParts);
+
+            // Access the MongoDB collection where the schedules will be stored
+            MongoCollection<Document> collection = db.getCollection("Schedules");
+
+            Document document =  collection.find(Filters.eq("assigned", assignedUser)).first();
+
+    if (document  == null){
+
+
+
+            // Create a document for each schedule timestamp and save it to the collection
+            Document doc = new Document("Weekdays", dayList)
+                    .append("Times", timeList)
+                    .append("assigned", assignedUser);
+
+            // Insert the document into the MongoDB collection
+            collection.insertOne(doc);
+    }else {
+
+        collection.updateOne(Filters.eq("assigned", assignedUser),
+                Updates.combine(Updates.set("Times", timeList), Updates.set("Weekdays", dayList)));
+
+    }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<String> getSettingsFromUser(String id){
+        MongoCollection<Document> collection = db.getCollection("Schedules");
+        System.out.println(id);
+        FindIterable<Document> settingsdocs = collection.find(Filters.eq("assigned", id));
+        System.out.println(settingsdocs);
+        List<String> results = new ArrayList<>();
+        for (Document doc : settingsdocs) {
+            System.out.println(doc);
+            results.add(doc.toJson());
+        }
+        return results;
+    }
+
+    public void deleteSettings(String id){
+        MongoCollection<Document> collection = db.getCollection("Schedules");
+        collection.deleteOne(Filters.eq("id", id));
     }
 
 
@@ -144,10 +202,19 @@ public class MongoDB {
         collection.deleteOne(Filters.eq("Name", name));
     }
 
-    public  void deleteSteamer(String name){
-
+    public void deleteStreamer(String name, String id) {
         MongoCollection<Document> collection = db.getCollection("Streamers");
-        collection.deleteOne(Filters.eq("Name", name));
+        Document doc = collection.find(Filters.and(Filters.eq("Name", name), Filters.eq("assigend", id))).first();
+
+        System.out.println(name+ " "+ id);
+
+        if (doc == null) {
+            System.out.println("cant find streamer");
+            return;
+        }
+
+        collection.deleteOne(Filters.and(Filters.eq("Name", name), Filters.eq("assigend", id)));
+        System.out.println("Streamer deleted successfully.");
     }
 
 
@@ -166,13 +233,20 @@ public class MongoDB {
     }
 
 
-    public void getUser(String Username){
+    public Document getUserByUserName(String Username) {
         MongoCollection<Document> collection = db.getCollection("Users");
-        Document myDoc = collection.find(Filters.eq("Username", Username)).first();
-        System.out.println(myDoc.toJson());
+        Document userdoc = collection.find(Filters.eq("Username", Username)).first();
+        return userdoc;
     }
 
 
+    public Document getUserByID(String ID) {
+        MongoCollection<Document> collection = db.getCollection("Users");
+        Document userdoc = collection.find(Filters.eq("_id", new ObjectId(ID))).first();
+
+
+        return userdoc;
+    }
 
     public List<Document> getAllStreamers(){
         MongoCollection<Document> collection = db.getCollection("Streamers");
@@ -190,12 +264,32 @@ public class MongoDB {
 
 
 
-    public void getStreamersFromUser(String name){
-        MongoCollection<Document> collection = db.getCollection("Clips");
-        Document myDoc = collection.find(Filters.eq("assigend", name)).first();
-        System.out.println(myDoc.toJson());
+    public List<String> getStreamersFromUser(String id){
+        MongoCollection<Document> collection = db.getCollection("Streamers");
+        System.out.println(id);
+        FindIterable<Document> streamerDocs = collection.find(Filters.eq("assigend", id));
+        List<String> results = new ArrayList<>();
+        for (Document doc : streamerDocs) {
+            System.out.println(doc);
+            results.add(doc.toJson());
+        }
+        return results;
     }
 
+    public List<String> getStreamersNameFromUser(String id){
+        MongoCollection<Document> collection = db.getCollection("Streamers");
+        System.out.println(id);
+        FindIterable<Document> streamerDocs = collection.find(Filters.eq("assigend", id));
+        List<String> results = new ArrayList<>();
+        for (Document doc : streamerDocs) {
+            System.out.println(doc);
+            String name = doc.getString("Name");
+            if (name != null) {
+                results.add(name);
+            }
+        }
+        return results;
+    }
 
 
 
@@ -218,4 +312,20 @@ public class MongoDB {
         Document myDoc = collection.find(Filters.eq("Name", name)).first();
         System.out.println(myDoc.toJson());
     }
+
+
+
+
+    //TODO: Listener Stuff
+
+    public void listendtoChanges(){
+        MongoCollection<Document> streamersCollection = db.getCollection("Streamers");
+
+        streamersCollection.watch().forEach((ChangeStreamDocument<Document> change) -> {
+            System.out.println("Change detected: " + change);
+        });
+
+    }
+
+
 }

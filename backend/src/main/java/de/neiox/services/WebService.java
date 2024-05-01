@@ -2,7 +2,6 @@ package de.neiox.services;
 
 import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
-import com.fasterxml.jackson.databind.JsonNode;
 import de.neiox.services.Auth.Auth;
 import io.javalin.Javalin;
 import org.bson.Document;
@@ -361,18 +360,32 @@ public class WebService {
         });
 
 
-        app.get("/api/get/all/Clips/", ctx ->{
+        app.get("/api/get/user/{userid}/Clips", ctx -> {
+            String userid = ctx.pathParam("userid");
 
-            try{
-
-                String  result = mongoDB.getAllClips().toString();
-
-                ctx.result("{\"response\": "+ result + "}");
-            }catch (Exception e){
+            try {
+                getClips getClips = new getClips();
+                String result = getClips.getAllClipsFromUser(userid).toString();
+                ctx.result("{\"response\": " + result + "}");
+            } catch (Exception e) {
                 ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
-
             }
         });
+
+
+
+        app.get("/api/get/user/{userid}/Clips/Finished", ctx -> {
+            String userid = ctx.pathParam("userid");
+
+            try {
+                getClips getClips = new getClips();
+                List<String> result = getClips.getFinishedClipsFromUser(userid);
+                ctx.json(result);
+            } catch (Exception e) {
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+
 
 
 

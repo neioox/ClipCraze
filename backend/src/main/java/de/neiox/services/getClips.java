@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -124,8 +125,6 @@ public class getClips implements Runnable{
      }
 
 
-
-
     public String getRandomClipFromUser(String id) throws IOException {
         List<String> clips = getAllClipsFromUser(id);
         if (clips.isEmpty()) {
@@ -145,8 +144,17 @@ public class getClips implements Runnable{
                  .collect(Collectors.toList());
          return Clips;
      }
+    public List<String> getFinishedClipsFromUser(String id) throws IOException {
+        Path dir = Paths.get("Clips");
+        List<String> clips = Files.list(dir)
 
-
+                .filter(path -> path.getFileName().toString().contains(id) &&
+                        path.getFileName().toString().contains("cropped") || path.getFileName().toString().contains("uncropped"))
+                .map(Path::getFileName)
+                .map(Path::toString)
+                .collect(Collectors.toList());
+        return clips;
+    }
 
     private void downloadClip(String clipUrl, int id, String userID){
 

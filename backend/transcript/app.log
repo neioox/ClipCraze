@@ -2,9 +2,12 @@ werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it 
  * Running on http://127.0.0.1:5000
 werkzeug - INFO - [33mPress CTRL+C to quit[0m
 __main__ - ERROR - Error generating subtitles: name 'make_response' is not defined
-werkzeug - INFO - 127.0.0.1 - - [07/Apr/2024 14:46:34] "POST /genSubtitle/nooreax_4_2024-04-05T_65f4a29bb51c7a6cb0b6e062.mp4 HTTP/1.1" 200 -
-werkzeug - INFO - 127.0.0.1 - - [07/Apr/2024 14:47:20] "POST /addsubtitles2vid/nooreax_4_2024-04-05T_65f4a29bb51c7a6cb0b6e062.mp4 HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [28/Apr/2024 16:27:56] "POST /genSubtitle/nooreax_3_2024-04-28T_65f4a29bb51c7a6cb0b6e062.mp4 HTTP/1.1" 200 -
+werkzeug - INFO - 127.0.0.1 - - [28/Apr/2024 16:28:54] "POST /addsubtitles2vid/nooreax_3_2024-04-28T_65f4a29bb51c7a6cb0b6e062.mp4 HTTP/1.1" 200 -
 py.warnings - WARNING - C:\Users\Platz\OneDrive\yt musik\Dokumente\GitHub\ClipCraze\backend\transcript\app.py:47: FutureWarning: Automatic detection of the color channel was deprecated in v0.19, and `channel_axis=None` will be the new default in v0.21. Set `channel_axis=-1` explicitly to silence this warning.
   return gaussian(image.astype(float), sigma=5)
 
-werkzeug - INFO - 127.0.0.1 - - [07/Apr/2024 14:52:47] "POST /crop4tiktok/nooreax_4_2024-04-05T_65f4a29bb51c7a6cb0b6e062.mp4/uncropped HTTP/1.1" 200 -
+py.warnings - WARNING - C:\Users\Platz\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\moviepy\video\io\ffmpeg_reader.py:123: UserWarning: Warning: in file ../Clips\nooreax_3_2024-04-28T_65f4a29bb51c7a6cb0b6e062_w_subs.mp4, 6220800 bytes wanted but 0 bytes read,at frame 1679/1681, at time 27.98/28.00 sec. Using the last valid frame instead.
+  warnings.warn("Warning: in file %s, "%(self.filename)+
+
+werkzeug - INFO - 127.0.0.1 - - [28/Apr/2024 16:34:53] "POST /crop4tiktok/nooreax_3_2024-04-28T_65f4a29bb51c7a6cb0b6e062_w_subs.mp4/uncropped HTTP/1.1" 200 -

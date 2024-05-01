@@ -8,6 +8,7 @@ import Home from "@/Home.vue"
 import './styles/app.css';
 import Register from './views/Register.vue';
 import Dashboard from './views/Dashboard.vue'
+import userClips from './components/userClips.vue';
 
 const app = createApp(App)
 
@@ -19,7 +20,8 @@ const routes = [
     { path: "/clip-settings/:id", component: SettingsView, name: "SettingsView" , props: true },
     { path: "/Login", component: Login, name:"Login"}, 
     {path: "/Register", component: Register, name: "Register"},
-    {path: "/Dashboard", component: Dashboard, name: "Dashboard"}
+    {path: "/Dashboard", component: Dashboard, name: "Dashboard"},
+    {path: "/Finished", component: userClips, name: "Finished"}
 ]
 
 

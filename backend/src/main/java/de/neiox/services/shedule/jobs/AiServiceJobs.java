@@ -3,10 +3,11 @@ package de.neiox.services.shedule.jobs;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.neiox.services.AIService;
 import de.neiox.services.getClips;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.quartz.*;
+import org.quartz.impl.matchers.GroupMatcher;
+
+import java.util.Date;
+import java.util.List;
 
 public class AiServiceJobs implements Job {
 
@@ -19,7 +20,7 @@ public class AiServiceJobs implements Job {
 
         try {
 
-
+            System.out.println("Starting JOB!!!");
 
             JobDataMap dataMap = jobExecutionContext.getJobDetail().getJobDataMap();
 

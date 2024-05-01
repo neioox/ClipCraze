@@ -1,6 +1,8 @@
 package de.neiox.services.database;
 
 import com.mongodb.Block;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
@@ -15,11 +17,32 @@ import java.util.*;
 public class MongoDB {
 
     private MongoClient mongo;
+
+    public MongoDatabase getDb() {
+        return db;
+    }
+
+    public void setDb(MongoDatabase db) {
+        this.db = db;
+    }
+
     private MongoDatabase db;
 
+
     public void connectToDatabase() throws Exception{
+
+
         try {
-            mongo =  MongoClients.create("mongodb://admin:ADMIN123@localhost:27017/");
+
+
+            ConnectionString url = new ConnectionString("mongodb://admin:ADMIN123@localhost:27017/");
+
+            MongoClientSettings settings =
+                    MongoClientSettings.builder()
+                            .applyConnectionString(url)
+                            .build();
+
+            mongo =  MongoClients.create(settings);
             db = mongo.getDatabase("ClipCraze");
 
             if (
@@ -318,13 +341,28 @@ public class MongoDB {
 
     //TODO: Listener Stuff
 
-    public void listendtoChanges(){
-        MongoCollection<Document> streamersCollection = db.getCollection("Streamers");
+    public void listenToChanges(String collection) {
+        MongoCollection<Document> streamersCollection = db.getCollection(collection);
 
-        streamersCollection.watch().forEach((ChangeStreamDocument<Document> change) -> {
-            System.out.println("Change detected: " + change);
-        });
+        // Create a change stream
+        ChangeStreamIterable<Document> changeStream = streamersCollection.watch();
 
+        System.out.println("test12456");
+
+        // Create a cursor for the change stream
+        MongoCursor<ChangeStreamDocument<Document>> cursor = changeStream.iterator();
+
+        System.out.println(cursor);
+        System.out.println(cursor.hasNext() + "sex");
+        while (cursor.hasNext())
+        {
+            ChangeStreamDocument<Document> change = cursor.next();
+            System.out.println(change);
+            Document doc = change.getFullDocument();
+            String scheduleExpression = doc.getString("Times");
+            System.out.println(scheduleExpression);
+            System.out.println(doc);
+        }
     }
 
 

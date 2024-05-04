@@ -6,6 +6,8 @@ import de.neiox.services.WebService;
 import de.neiox.services.database.Handler.HandleNewOrUpdatesSchedules;
 import de.neiox.services.database.MongoDB;
 import de.neiox.services.getClips;
+import de.neiox.utls.Vars;
+import io.github.cdimascio.dotenv.Dotenv;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -17,6 +19,7 @@ public class Main {
     public static MongoDB mongoDB =  new MongoDB();
 
     public static void main(String[] args) throws Exception {
+
 
         mongoDB.connectToDatabase();
         HandleNewOrUpdatesSchedules handleNewOrUpdatesSchedules = new HandleNewOrUpdatesSchedules();

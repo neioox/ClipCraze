@@ -11,7 +11,9 @@ from langchain.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler 
 import logging
+import chardet
 from modules.faceDetection import get_face_position
+
 
 from skimage.filters import gaussian
 app = Flask(__name__)
@@ -128,29 +130,28 @@ def convertclip2tt(filename):
         output_file = os.path.join(clips_path, filename.replace(".mp4", "_w_subs.mp4"))
         subtitle_file = os.path.join("SrtFiles", filename + ".srt")
 
+
         def split_text(txt):
+            print(txt)
             words = txt.split()
             lines = [' '.join(words[i:i+3]) for i in range(0, len(words), 3)]
             return '\n'.join(lines)
 
-        generator = lambda txt: TextClip(split_text(txt), 
+        generator = lambda txt: TextClip(split_text(txt),
                                          font='komika',
                                          fontsize=40,
-                                         color='white',
-                                      
-                                           )
+                                         color='white')
+
         subtitles = SubtitlesClip(subtitle_file, generator)
 
         video = VideoFileClip(input_file)
-    
-        result = CompositeVideoClip([video, subtitles.set_pos(('center', 'center'))])
+        result = CompositeVideoClip([video, subtitles.set_pos(('center', 'bottom'))])
 
         result.write_videofile(output_file, codec="libx264", audio_codec="aac")
 
-        return success_response("Video with subtitles created")
+        return jsonify({"success": True, "message": "Video with subtitles created"})
     except Exception as e:
-        return error_response(str(e))
-
+        return jsonify({"success": False, "error": str(e)})
 
 def transcribe_audio(path, name):
     logger.info('Transcription started for file: %s', path)

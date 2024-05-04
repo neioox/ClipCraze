@@ -2,8 +2,7 @@
   <div>
     <h2>Finsihed Clips</h2>
 
-
-
+    
 
 
     <div v-for="(clip, index) in clips" :key="index">

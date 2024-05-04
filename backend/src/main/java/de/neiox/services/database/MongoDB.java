@@ -7,6 +7,7 @@ import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
+import de.neiox.utls.Vars;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
@@ -35,7 +36,10 @@ public class MongoDB {
         try {
 
 
-            ConnectionString url = new ConnectionString("mongodb://admin:ADMIN123@localhost:27017/");
+
+            System.out.println(Vars.getDbConnectionString());
+            ConnectionString url = new ConnectionString(Vars.getDbConnectionString());
+
 
             MongoClientSettings settings =
                     MongoClientSettings.builder()

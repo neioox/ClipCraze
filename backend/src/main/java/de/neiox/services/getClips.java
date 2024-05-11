@@ -32,7 +32,7 @@ public class getClips implements Runnable{
     LocalDateTime now = LocalDateTime.now();
 
     // Subtract 7 days to get the date of last week
-    LocalDateTime lastWeek = now.minusDays(7);
+    LocalDateTime lastWeek = now.minusDays(10);
 
     // Define the desired date and time format
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'");
@@ -144,12 +144,13 @@ public class getClips implements Runnable{
                  .collect(Collectors.toList());
          return Clips;
      }
+
     public List<String> getFinishedClipsFromUser(String id) throws IOException {
         Path dir = Paths.get("Clips");
         List<String> clips = Files.list(dir)
 
                 .filter(path -> path.getFileName().toString().contains(id) &&
-                        path.getFileName().toString().contains("cropped") || path.getFileName().toString().contains("uncropped"))
+                        path.getFileName().toString().contains("final"))
                 .map(Path::getFileName)
                 .map(Path::toString)
                 .collect(Collectors.toList());

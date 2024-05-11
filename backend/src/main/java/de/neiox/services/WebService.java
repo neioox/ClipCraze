@@ -65,6 +65,18 @@ public class WebService {
             ctx.json(result);
         });
 
+
+        app.post("/api/convert4tiktok/v2/{filename}", ctx ->{
+            String filename = ctx.pathParam("filename");
+
+            String result = VideoEditorHandler.convertClipToShortVid(filename);
+
+            ctx.json(result);
+        });
+
+
+
+
         app.post("/api/addsubtitles2vid/{filename}", ctx ->{
             String filename = ctx.pathParam("filename");
             String result = aiService.convertclip2tt(filename);
@@ -94,18 +106,41 @@ public class WebService {
         app.post("/api/requestClips", ctx -> {
 
             String id = ctx.formParam("id");
-            System.out.println("TEST!!!!!");
-            System.out.println(id);
             getClips getClips = new getClips();
 
+           List<String> clips =  getClips.getAllClipsFromUser(id);
+
+           if (!clips.isEmpty()){
+
+               String filename = "";
+               for (int i = 0; i < clips.size(); i++) {
+
+
+                   filename = clips.get(i);
+                   Path mp4File = Paths.get("Clips", filename);
+                   Path subFile = Paths.get("transcript/SrtFiles", filename + ".srt");
+
+                   try {
+                       Files.delete(mp4File);
+                       if (Files.exists(subFile)) {
+                           Files.delete(subFile);
+                       }
+                   } catch (Exception e) {
+                       ctx.status(555).result(e.toString());
+
+                   }
+               }
+           }
+
             getClips.requestClips(id);
+
             ctx.result("Downloaded all clips of today!");
         });
 
         app.get("/api/clips", ctx -> {
             Path dir = Paths.get("Clips");
 
-            System.out.println("SEX "+ dir);
+
             List<String> videos = Files.list(dir)
                     .filter(path -> !path.getFileName().toString().contains("w_subs"))
                     .map(Path::getFileName)

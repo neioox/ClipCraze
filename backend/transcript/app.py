@@ -46,7 +46,7 @@ def error_response(message):
 
 def blur(image):
     """ Returns a blurred (radius=2 pixels) version of the image """
-    return gaussian(image.astype(float), sigma=5)
+    return gaussian(image.astype(float), sigma=2)
 
 
 @app.route("/crop4tiktok/<filename>/<format>", methods=["POST"])
@@ -56,24 +56,28 @@ def crop4tiktok(filename, format):
     input_file = os.path.join(clips_path, filename)
     print(f"Input file: {input_file}")
     
+
+    clip = VideoFileClip(input_file)
+    print("Clip created")
+    (w, h) = clip.size
+    print(f"Clip size: {w}x{h}")
+    crop_width = h * 9 / 16
+    x1, x2 = (w - crop_width) // 2, (w + crop_width) // 2
+    y1, y2 = 0, h
+    print(f"Crop dimensions: x1={x1}, y1={y1}, x2={x2}, y2={y2}")
+    cropped_clip = crop(clip, x1=x1, y1=y1, x2=x2, y2=y2)
+    print("Clip cropped")
+
+
+
     if format == "cropped":
         print("Format is cropped")
         try:
 
-            clip = VideoFileClip(input_file)
-            print("Clip created")
-            (w, h) = clip.size
-            print(f"Clip size: {w}x{h}")
-            crop_width = h * 9 / 16
-            x1, x2 = (w - crop_width) // 2, (w + crop_width) // 2
-            y1, y2 = 0, h
-            print(f"Crop dimensions: x1={x1}, y1={y1}, x2={x2}, y2={y2}")
-            cropped_clip = crop(clip, x1=x1, y1=y1, x2=x2, y2=y2)
-            print("Clip cropped")
-
+      
             output_file = os.path.join(clips_path, filename.replace(".mp4", "_4_tiktok.mp4"))
             print(f"Output file: {output_file}")
-            cropped_clip.write_videofile(output_file)
+            cropped_clip.write_videofile(output_file,  threads = 6)
             print("Cropped video written")
 
             return success_response("Cropped video for TikTok")
@@ -89,16 +93,7 @@ def crop4tiktok(filename, format):
             repositiond_clip = clip.resize(0.35)
             
             
-            print("Clip created")
-            (w, h) = clip.size
-            print(f"Clip size: {w}x{h}")
-            crop_width = h * 9 / 16
-            x1, x2 = (w - crop_width) // 2, (w + crop_width) // 2
-            y1, y2 = 0, h
-            print(f"Crop dimensions: x1={x1}, y1={y1}, x2={x2}, y2={y2}")
-           
-       
-            print("Clip cropped")
+
             
             blurred_clip = clip.fl_image(blur)  # Adjust the blur intensity as needed
             print("Clip blurred")
@@ -110,7 +105,7 @@ def crop4tiktok(filename, format):
 
             output_file = os.path.join(clips_path, filename.replace(".mp4", "_4_tiktok_uncropped.mp4"))
             print(f"Output file: {output_file}")
-            final_clip.write_videofile(output_file)
+            final_clip.write_videofile(output_file, threads = 6)
             print("Uncropped video written")
 
             return success_response("Uncropped video for TikTok")
@@ -119,8 +114,6 @@ def crop4tiktok(filename, format):
             return error_response(str(e))
     
         
-
-
 @app.route("/addsubtitles2vid/<filename>", methods=["GET", "POST"])
 def convertclip2tt(filename):
     clips_path = "../Clips"
@@ -139,7 +132,7 @@ def convertclip2tt(filename):
 
         generator = lambda txt: TextClip(split_text(txt),
                                          font='komika',
-                                         fontsize=40,
+                                         fontsize=60,
                                          color='white')
 
         subtitles = SubtitlesClip(subtitle_file, generator)
@@ -147,11 +140,13 @@ def convertclip2tt(filename):
         video = VideoFileClip(input_file)
         result = CompositeVideoClip([video, subtitles.set_pos(('center', 'bottom'))])
 
-        result.write_videofile(output_file, codec="libx264", audio_codec="aac")
+        result.write_videofile(output_file, codec="libx264", audio_codec="aac", threads = 6)
 
         return jsonify({"success": True, "message": "Video with subtitles created"})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
+
+
 
 def transcribe_audio(path, name):
     logger.info('Transcription started for file: %s', path)

@@ -24,11 +24,12 @@
 import genSubTitels from './genSubTitels.vue';
 import DeleteClip from './DeleteClip.vue';
 import DownloadSubs from './DownloadSubtitles.vue';
-import { ref, onMounted, computed } from 'vue';
+import { provide, ref, onMounted, computed } from 'vue';
 import router from '../main.js'
 
 const clips = ref([]);
 const subtitlesExist = ref({});
+
 
 
 const navigateToSettings = async (Clip) => {
@@ -47,7 +48,8 @@ const recieveclipList = async () => {
     const response = await fetch("http://localhost:8080/api/clips");
     const clipList = await response.json();
     clips.value = clipList;
-
+   // console.log(clipList)
+    localStorage.setItem("clips", clipList)
     await Promise.all(clipList.map(async (clipName) => {
       const subExist = await subExists(clipName);
       subtitlesExist.value[clipName] = subExist;

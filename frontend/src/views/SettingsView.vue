@@ -62,7 +62,7 @@ const clipID = useRoute().params.id;
 
 const clip = ref(clipID);
 const clipWithSubs = ref(clipID.replace('.mp4', '_w_subs.mp4'));
-const shortClip = ref(clipID.replace('.mp4', '_w_subs_4_tiktok_uncropped.mp4'));
+const shortClip = ref(clipID.replace('.mp4', '_final.mp4'));
 const desc  = ref("")
 const checkSubtitle = ref();
 

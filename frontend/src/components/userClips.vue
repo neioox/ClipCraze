@@ -2,8 +2,8 @@
   <div>
     <h2>Finsihed Clips</h2>
 
-    
 
+    <buttton>Renew clips</buttton>
 
     <div v-for="(clip, index) in clips" :key="index">
       <video class="w-500 h-300 rounded-lg" :src="'http://localhost:8080/api/getclips/' + clip" controls></video>
@@ -39,14 +39,14 @@ export default {
         try {
           const response = await fetch(`http://localhost:8080/api/get/user/${userId}/Clips/Finished`);
           const clipList = await response.json();
-          
-        
-          clipList.forEach((clip => 
-        
+
+
+          clipList.forEach((clip =>
+
 
             this.clips.push(clip)
 
-        ));          
+          ));
 
           console.log(clipList)
         } catch (error) {

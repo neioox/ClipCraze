@@ -1,16 +1,10 @@
 package de.neiox;
 
-import de.neiox.services.AIService;
-import de.neiox.services.Setup;
-import de.neiox.services.WebService;
+import de.neiox.services.*;
 import de.neiox.services.database.Handler.HandleNewOrUpdatesSchedules;
 import de.neiox.services.database.MongoDB;
-import de.neiox.services.getClips;
-import de.neiox.utls.Vars;
-import io.github.cdimascio.dotenv.Dotenv;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +14,10 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+
+
+
+     //   VideoEditorHandler.convertClipToShortVid("LetsHugoTV_1_2024-05-07T_65f4a29bb51c7a6cb0b6e062.mp4");
 
         mongoDB.connectToDatabase();
         HandleNewOrUpdatesSchedules handleNewOrUpdatesSchedules = new HandleNewOrUpdatesSchedules();
@@ -31,7 +29,7 @@ public class Main {
 
 
 
-       List test =  getClips.getFinishedClipsFromUser("65f4a29bb51c7a6cb0b6e062");
+       List<String> test =  getClips.getFinishedClipsFromUser("65f4a29bb51c7a6cb0b6e062");
 
         System.out.println(test.toString());
 

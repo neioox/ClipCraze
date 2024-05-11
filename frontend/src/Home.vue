@@ -5,8 +5,10 @@
 
 <div id="app">
     <h1 class="font-bold , drop-shadow-sm, text-5xl" >CLIPCRAZE</h1>
-    <ClipsList></ClipsList>
+    
     <ReceiveClips></ReceiveClips>
+    <ClipsList></ClipsList>
+    
      <router-view></router-view>
 
     

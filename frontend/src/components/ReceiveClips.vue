@@ -4,22 +4,41 @@ import SubtitleGenerator from '@/utils/SubtitleGenerator';
 
 // Corrected the casing to 'LoadingState' consistently
 const LoadingState = ref(false)
-const clips = localStorage.getItem("clips").split(",")
+
+
+
+
+
+
+  
+
 
 const subtitleGenerator = new SubtitleGenerator();
 
 async function handleGenerateSubtitles(event) {
+ 
+  let clips = localStorage.getItem("clips")
+  
+  clips = clips.split(", ")
   console.log(clips);
   
+      if (clips.length <= 0 ) {
+        
+      
+
       for (const clip of clips) {
     try {
       LoadingState.value = true;  // Correct casing
       await subtitleGenerator.generateSubtitles(event, clip);
+    
+    
+    
     } catch (error) {
       console.error("Error in generating subtitles:", error);
     } finally {
       LoadingState.value = false;  // Correct casing
     }
+  }
   }
 }
 
@@ -47,6 +66,7 @@ async function receiveClips() {
     LoadingState.value = false;  // Correct casing
   }
 }
+
 </script>
 
 <template>

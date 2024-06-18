@@ -4,3 +4,4 @@ langchain==0.1.2
 moviepy==1.0.3
 stable_ts==2.13.7
 Werkzeug===2.2.2
+scikit-image==0.21.0

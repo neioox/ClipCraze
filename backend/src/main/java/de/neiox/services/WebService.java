@@ -3,8 +3,11 @@ package de.neiox.services;
 import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
 import de.neiox.services.Auth.Auth;
+import de.neiox.utls.requestHandler;
 import io.javalin.Javalin;
+import io.javalin.http.staticfiles.Location;
 import org.bson.Document;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 
@@ -12,10 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,15 +46,35 @@ public class WebService {
                     it.anyHost();
                 });
             });
+            boolean isRunningFromJar = isRunningFromJar();
+
+            config.staticFiles.add(staticFileConfig -> {
+                if (isRunningFromJar) {
+                    // Running from JAR
+                    staticFileConfig.directory = "/public/dist";
+                    staticFileConfig.location = Location.CLASSPATH;
+                } else {
+                    // Running from IDE or file system
+                    staticFileConfig.directory = "src/main/resources/public/dist";
+                    staticFileConfig.location = Location.EXTERNAL;
+                }
+                staticFileConfig.hostedPath = "/";
+            });
 
         }).start(port);
         new WebService(app).register();
-
     }
 
+    private static boolean isRunningFromJar() {
+        String className = WebService.class.getName().replace('.', '/');
+        String classJar = WebService.class.getResource("/" + className + ".class").toString();
+        return classJar.startsWith("jar:");
+    }
 
     public void register() {
-
+        app.get("/", ctx -> {
+            ctx.redirect("/index.html");
+        });
 
         app.post("/api/crop4tiktok/{filename}/{format}", ctx ->{
             String filename = ctx.pathParam("filename");
@@ -73,9 +93,6 @@ public class WebService {
 
             ctx.json(result);
         });
-
-
-
 
         app.post("/api/addsubtitles2vid/{filename}", ctx ->{
             String filename = ctx.pathParam("filename");
@@ -503,22 +520,43 @@ public class WebService {
 
            }
         });
-
         app.post("/api/get/streamer", ctx -> {
             String id = ctx.formParam("id");
 
+            try {
+                // Assume this returns a List of JSON strings
+                List<String> streamers = mongoDB.getStreamersFromUser(id);
 
-            try{
+                // Extract names from the JSON objects
+                List<String> streamerNames = new ArrayList<>();
+                for (String streamerJson : streamers) {
+                    JSONObject jsonObject = new JSONObject(streamerJson);
+                    streamerNames.add(jsonObject.getString("Name"));
+                }
 
-               List<String> streamers = mongoDB.getStreamersFromUser(id);
+                // Debugging: Print the streamer names
+                System.out.println(streamerNames);
 
+                // Create a list to hold user info as JSON objects
+                List<JSONObject> userInfo = new ArrayList<>();
 
-               ctx.result("{\"streamers\": "+ streamers + "}");
-           }catch (Exception e ){
+                // Fetch user info from Twitch API
+                for (String streamer : streamerNames) {
+                    String response = requestHandler.getRequest("https://api.twitch.tv/helix/users?login=" + streamer);
+                    JSONObject streamerInfo = new JSONObject(response);
+                    userInfo.add(streamerInfo);
+                }
 
-               ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+                // Prepare JSON response
+                JSONObject jsonResponse = new JSONObject();
+                jsonResponse.put("streamers", new JSONArray(streamerNames));
+                jsonResponse.put("userInfo", new JSONArray(userInfo));
 
-           }
+                // Send response
+                ctx.result(jsonResponse.toString()).contentType("application/json");
+            } catch (Exception e) {
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
         });
 
         app.get("/api/translate/", ctx -> {

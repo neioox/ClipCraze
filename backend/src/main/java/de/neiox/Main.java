@@ -1,13 +1,19 @@
 package de.neiox;
 
+import de.neiox.font.FontHandler;
+import de.neiox.manager.FileHandler;
 import de.neiox.services.*;
 import de.neiox.services.database.Handler.HandleNewOrUpdatesSchedules;
 import de.neiox.services.database.MongoDB;
+import de.neiox.wrapper.FfmpegWrapper;
 
-import java.util.List;
+
+
+import java.nio.file.Path;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 
 public class Main {
     public static MongoDB mongoDB =  new MongoDB();
@@ -17,8 +23,18 @@ public class Main {
 
 
 
-     //   VideoEditorHandler.convertClipToShortVid("LetsHugoTV_1_2024-05-07T_65f4a29bb51c7a6cb0b6e062.mp4");
 
+
+
+        Path tempFile = FileHandler.copyResourceToTempFile("/LEMONMILK-Bold.otf");
+        FontHandler.installFonts(tempFile.toFile());
+        String modifiedString = tempFile.toString().replaceAll("\\\\", "/");
+        modifiedString = modifiedString.replaceAll("C:/", "");
+        System.out.println(modifiedString);
+        FfmpegWrapper.testFont(modifiedString);
+
+        FontHandler.printAllInstalledFonts();
+        System.out.println("PENIS");
         mongoDB.connectToDatabase();
         HandleNewOrUpdatesSchedules handleNewOrUpdatesSchedules = new HandleNewOrUpdatesSchedules();
 
@@ -28,20 +44,6 @@ public class Main {
         getClips getClips = new getClips();
 
 
-
-       List<String> test =  getClips.getFinishedClipsFromUser("65f4a29bb51c7a6cb0b6e062");
-
-        System.out.println(test.toString());
-
-        /*
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(4);
-        service.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                // mongoDB.listenToChanges("Schedules");
-                handleNewOrUpdatesSchedules.checkForUpdates("Schedules");
-            }
-        }, 0, 10, TimeUnit.SECONDS);*/
         ScheduledExecutorService service = Executors.newScheduledThreadPool(4);
         service.scheduleAtFixedRate(new Runnable() {
             int count = 0;

@@ -18,7 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -44,35 +43,7 @@ public class getClips implements Runnable{
     String formattedDateTime = now.format(formatter);
 
     String url = "";
-    requestHandler requestHandler = new requestHandler();
 
-    public JsonNode parseStreamersJson() {
-
-        String filePath = "src/main/java/de/neiox/Streamers.json";
-
-        try {
-            System.out.println("Current working directory: " + System.getProperty("user.dir"));
-
-            // Create an ObjectMapper instance
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            // Parse the JSON file into a JsonNode
-            JsonNode jsonNode = objectMapper.readTree(new File(filePath));
-
-            // Access the "Streamers" array and loop through its elements
-            JsonNode streamersNode = jsonNode.get("Streamers");
-            if (streamersNode.isArray()) {
-                return streamersNode;
-
-            } else {
-                System.out.println("The 'Streamers' property is not an array in the JSON.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
 
 
     public void requestClips(String id) {
@@ -201,17 +172,9 @@ public class getClips implements Runnable{
 
         } catch (IOException e) {
 
-
         }
-
     }
 
-    public void checkIfSubTitelsExists(String Path){
-
-
-
-
-    }
 
 
     @Override

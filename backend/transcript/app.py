@@ -11,8 +11,7 @@ from langchain.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler 
 import logging
-import chardet
-from modules.faceDetection import get_face_position
+#from modules.faceDetection import get_face_position
 
 
 from skimage.filters import gaussian
@@ -74,7 +73,6 @@ def crop4tiktok(filename, format):
         print("Format is cropped")
         try:
 
-      
             output_file = os.path.join(clips_path, filename.replace(".mp4", "_4_tiktok.mp4"))
             print(f"Output file: {output_file}")
             cropped_clip.write_videofile(output_file,  threads = 6)

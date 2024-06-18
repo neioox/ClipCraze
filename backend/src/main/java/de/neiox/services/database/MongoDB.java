@@ -37,7 +37,7 @@ public class MongoDB {
 
 
 
-            System.out.println(Vars.getDbConnectionString());
+
             ConnectionString url = new ConnectionString(Vars.getDbConnectionString());
 
 

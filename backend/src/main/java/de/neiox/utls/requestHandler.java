@@ -9,9 +9,9 @@ import java.net.URL;
 
 public class requestHandler {
 
-    private String Auth = "Bearer dh9c9di6800h6yg637svdyxv760322";
-    private String CliendID = "a21zjh9htub57nqweuoe5ug197eodg";
-    public String getRequest(String url) {
+    private static String Auth = "Bearer dh9c9di6800h6yg637svdyxv760322";
+    private static String CliendID = "a21zjh9htub57nqweuoe5ug197eodg";
+    public static String getRequest(String url) {
         try {
             URL http = new URL(url);
             HttpURLConnection con = (HttpURLConnection) http.openConnection();
@@ -36,8 +36,8 @@ public class requestHandler {
                 }
 
                 reader.close(); // Close the reader when you're done with it.
-                System.out.println("Sex");
-                System.out.println(response);
+                //System.out.println("Sex");
+                //System.out.println(response);
                 return response.toString();
          //   }
         } catch (IOException e) {

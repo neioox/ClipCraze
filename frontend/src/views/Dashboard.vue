@@ -10,6 +10,7 @@
       <thead>
         <tr class="bg-gray-100">
           <th class="py-2 px-4 border border-gray-300">Streamer</th>
+          <th class="py-2 px-4 border border-gray-300">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -30,50 +31,12 @@
     </div>
   </div>
   <shedule-panel></shedule-panel>
-
+  <back-button></back-button>
 </template>
 
 <script>
-
-
 import ShedulePanel from '@/components/ShedulePanel.vue';
-
-
-
-
-
-
-async function addStreamer2DB(streamername, userid) {
-
-
-  try {
-    const formData = new FormData();
-    formData.append('name', streamername);
-    formData.append('assigneduser', userid);
-
-    const response = await fetch(`http://localhost:8080/api/addStreamer`, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('Invalid');
-    }
-
-    const data = await response.json();
-
-    console.log(data.response)
-
-
-  } catch (error) {
-    console.error('Error:', error.message);
-    // Handle error here
-  }
-
-
-}
-
-
+import BackButton from '@/components/backButton.vue';
 
 export default {
   data() {
@@ -86,11 +49,11 @@ export default {
 
   methods: {
     async getStreamers() {
-      if (this.streamers.length == 0) {
+      if (this.streamers.length === 0) {
         const formData = new FormData();
         formData.append('id', localStorage.getItem("userid"));
 
-        const response = await fetch(`http://localhost:8080/api/get/streamer`, {
+        const response = await fetch('http://localhost:8080/api/get/streamer', {
           method: 'POST',
           body: formData
         });
@@ -100,14 +63,7 @@ export default {
         }
 
         const data = await response.json();
-
-        const savedStreamrs = data.streamers
-
-        savedStreamrs.forEach(streamer => {
-          this.streamers.push(streamer.Name)
-        });
-
-
+        this.streamers = data.streamers;
       }
     },
 
@@ -117,7 +73,7 @@ export default {
         formData.append('name', streamername);
         formData.append('assigneduser', userid);
 
-        const response = await fetch(`http://localhost:8080/api/addStreamer`, {
+        const response = await fetch('http://localhost:8080/api/addStreamer', {
           method: 'POST',
           body: formData
         });
@@ -127,7 +83,7 @@ export default {
         }
 
         const data = await response.json();
-        console.log(data.response)
+        console.log(data.response);
       } catch (error) {
         console.error('Error:', error.message);
         // Handle error here
@@ -135,39 +91,30 @@ export default {
     },
 
     addStreamer() {
-      // Check if the newStreamer is not empty
       if (this.newStreamer.trim() !== '') {
-        const streamer = this.newStreamer.trim()
+        const streamer = this.newStreamer.trim();
         this.streamers.push(streamer);
-        if (localStorage.getItem("username")) {
-          this.addStreamer2DB(streamer, localStorage.getItem("userid"));
+        const userid = localStorage.getItem("userid");
+        if (userid) {
+          this.addStreamer2DB(streamer, userid);
         }
 
-        // Clear the input field after adding the streamer
         this.newStreamer = '';
       }
     },
 
     async removeStreamer(index) {
-      // Remove the streamer from the streamers array based on the index
-
-      const streamername = this.streamers[index]
-      const userid = localStorage.getItem("userid")
-
+      const streamername = this.streamers[index];
+      const userid = localStorage.getItem("userid");
 
       try {
-
         const formData = new FormData();
         formData.append('streamername', streamername);
         formData.append('id', userid);
 
-
-
-
         this.streamers.splice(index, 1);
 
-
-        const response = await fetch(`http://localhost:8080/api/delete/streamer`, {
+        const response = await fetch('http://localhost:8080/api/delete/streamer', {
           method: 'DELETE',
           body: formData
         });
@@ -177,28 +124,22 @@ export default {
         }
 
         const data = await response.json();
-        console.log(data.response)
+        console.log(data.response);
       } catch (error) {
         console.error('Error:', error.message);
         // Handle error here
       }
-
-
     }
   },
 
   components: {
-
-    "shedule-panel": ShedulePanel
-
+    'shedule-panel': ShedulePanel,
+    'back-button': BackButton
   },
 
   async mounted() {
-    // Retrieve the username from localStorage
     this.username = localStorage.getItem('username') || 'Guest';
-
     await this.getStreamers();
   }
 };
-
 </script>

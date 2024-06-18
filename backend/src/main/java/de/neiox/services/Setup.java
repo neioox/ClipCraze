@@ -16,7 +16,6 @@ public class Setup{
 
             if (Files.notExists(clipfolderPath)) {
 
-
                 try {
                 Files.createDirectories(clipfolderPath);
 

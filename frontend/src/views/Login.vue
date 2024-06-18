@@ -35,9 +35,12 @@
       </div>
     </div>
   </div>
+  <back-button></back-button>
 </template>
 
 <script>
+
+import backButton from '@/components/backButton.vue';
 export default {
   data() {
     return {
@@ -62,7 +65,7 @@ export default {
         }
 
         const data = await response.json();
-
+        console.log(data)
         localStorage.setItem("username", this.username);
         localStorage.setItem("userid", data.userID);
         localStorage.setItem("token", data.token);
@@ -74,6 +77,9 @@ export default {
         // Handle error here
       }
     }
-  }
+  },
+  components: {
+    'back-button': backButton
+  },
 };
 </script>

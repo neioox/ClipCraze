@@ -1,12 +1,97 @@
 package de.neiox.wrapper;
 
+import de.neiox.manager.FileHandler;
 import de.neiox.wrapper.assets.Font;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class FfmpegWrapper {
+
+
+    public static void testFont(String fontPath) {
+        try {
+            // Path to your font file
+
+
+            // FFmpeg command to test the font
+            String[] command = {
+                    "ffmpeg",
+                    "-f", "lavfi",
+                    "-i", "color=size=320x240:duration=5:rate=25",
+                    "-vf", String.format("drawtext=fontfile=%s:text='Hello World':fontcolor=white:fontsize=30:x=(w-text_w)/2:y=(h-text_h)/2", fontPath),
+                    "-t", "5",
+                    "-y", "output.mp4"
+            };
+
+            // Execute the FFmpeg command
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            processBuilder.directory(new File("./"));
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+
+            // Capture and print the output
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            }
+
+            // Wait for the process to complete
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("Font test completed successfully. Check the output.mp4 file.");
+            } else {
+                System.err.println("Font test failed. Check the FFmpeg output for details.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void addSubtitleWithFont(String videoPath, String subtitlePath, String fontName, String outputVideoPath) {
+        try {
+            // FFmpeg command to add subtitle with custom font
+            String[] command = {
+                    "ffmpeg",
+                    "-i", videoPath,
+                    "-vf", String.format("subtitles='%s:force_style=FontName=%s'", subtitlePath, fontName),
+                    "-c:a", "copy",
+                    "-y", outputVideoPath
+            };
+
+
+            // Execute the FFmpeg command
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            processBuilder.directory(new File("./"));
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+
+            // Capture and print the output
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            }
+
+            // Wait for the process to complete
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("Subtitle with custom font added successfully. Check the " + outputVideoPath + " file.");
+            } else {
+                System.err.println("Adding subtitle with custom font failed. Check the FFmpeg output for details.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void applyOnFile(ProcessBuilder processBuilder) {
         try {
@@ -80,12 +165,24 @@ public class FfmpegWrapper {
         }
     }
 
+
     public static void addSrtFile(String inputFile, String outputFile, String srtFile, Font font) {
         try {
+            // Verify the font file path
+            File fontFile = new File(font.fontPath);
+            if (!fontFile.exists() || !fontFile.isFile()) {
+                throw new IOException("Font file does not exist or is not a file: " + font.fontPath);
+            }
+
+            // Escape spaces in font file path
+
+            // Prepare the subtitles filter with the escaped font path
             String subtitles = String.format(
-                    "subtitles=%s:force_style='FontName=%s;FontSize=%d;PrimaryColour=&H%s;Alignment=2'",
-                    srtFile, font.name, font.size, font.color
+                    "subtitles=%s:force_style='FontFile=%s;FontSize=%d;PrimaryColour=&H%s;Alignment=2'",
+                    srtFile, fontFile, font.size, font.color
             );
+            System.out.println("FFmpeg subtitles option: " + subtitles);
+
             ProcessBuilder processBuilder = new ProcessBuilder(
                     "ffmpeg", "-i", inputFile, "-vf", subtitles, "-codec:a", "copy", outputFile
             );
@@ -97,6 +194,7 @@ public class FfmpegWrapper {
             e.printStackTrace();
         }
     }
+
 
     public static void addCenteredResizedOverlay(String backgroundVideo, String overlayVideo, String outputFile) {
         try {

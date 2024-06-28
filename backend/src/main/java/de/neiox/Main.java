@@ -25,7 +25,6 @@ public class Main {
 
 
 
-
         Path tempFile = FileHandler.copyResourceToTempFile("/LEMONMILK-Bold.otf");
         FontHandler.installFonts(tempFile.toFile());
         String modifiedString = tempFile.toString().replaceAll("\\\\", "/");

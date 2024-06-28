@@ -1,11 +1,12 @@
 <template>
   <div class="container mx-auto mt-5">
-    <form class="max-w-md mx-auto bg-white p-8 rounded shadow-md">
+    <form @submit.prevent="registerUser" class="max-w-md mx-auto bg-white p-8 rounded shadow-md">
       <div class="mb-4">
         <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Username</label>
         <input
           type="text"
           id="username"
+          v-model="username"
           placeholder="Enter username"
           class="w-full px-3 py-2 border rounded focus:outline-none focus:shadow-outline"
         />
@@ -15,6 +16,7 @@
         <input
           type="email"
           id="email"
+          v-model="email"
           placeholder="Enter email"
           class="w-full px-3 py-2 border rounded focus:outline-none focus:shadow-outline"
         />
@@ -24,66 +26,53 @@
         <input
           type="password"
           id="password"
+          v-model="password"
           placeholder="Enter password"
           class="w-full px-3 py-2 border rounded focus:outline-none focus:shadow-outline"
         />
       </div>
       <button
         type="submit"
-        class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+       class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
       >
         Register
       </button>
     </form>
   </div>
 </template>
->
-
 
 <script>
+export default {
+  data() {
+    return {
+      username: '',
+      email: '',
+      password: ''
+    };
+  },
+  methods: {
+    async registerUser() {
+      // Construct form data
+      const formData = new FormData();
+      formData.append('username', this.username);
+      formData.append('password', this.password);
+      formData.append('group', 'user');
 
+      try {
+        const response = await fetch(`http://localhost:8080/api/addUser/`, {
+          method: 'POST',
+          body: formData
+        });
 
-// Check if URL contains "Register"
-if (window.location.href.includes("Register")) {
+        const data = await response.json();
+        console.log(data); // Log the API response
 
-
-  window.onload = function() {
-  var form = document.querySelector('form');
-
-  // Remove all event listeners
-  var formClone = form.cloneNode(true);
-  form.parentNode.replaceChild(formClone, form);
-
-  document.querySelector('form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent the form from submitting
-
-    // Get the form values
-    var username = document.getElementById('username').value;
-    var email = document.getElementById('email').value;
-    var password = document.getElementById('password').value;
-
-    var formData = new FormData();
-    formData.append('username', username);
-    formData.append('password', password);
-    formData.append('group', 'user');
-
-    fetch(`http://localhost:8080/api/addUser/`, {
-      method: 'POST',
-      body: formData
-    })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(async function(data) {
-      console.log(data); // Log the API response
-
-     await router.push({ name: 'Login' });
-    })
-    .catch(function(error) {
-      console.error('Error:', error);
-    });
-  });
+        // Navigate to Login page after successful registration
+        this.$router.push({ name: 'Login' });
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  } 
 };
-}
-
 </script>

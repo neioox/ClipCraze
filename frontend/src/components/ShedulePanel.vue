@@ -7,7 +7,7 @@
     </div>
 
     <div>
-      <table class="w-full border-collapse border border-gray-300">
+      <table class="w-full rounded-lg overflow-hidden shadow-lg">
         <thead>
           <tr class="bg-gray-100">
             <th class="py-2 px-4 border border-gray-300">Time</th>
@@ -23,12 +23,12 @@
         </tbody>
       </table>
       <div class="mt-4">
-        <label for="newTime" class="block">Add Time:</label>
+        <label for="newTime" class="block font-bold">Add Time</label>
         <input type="time" id="newTime" v-model="newTime" class="w-full border border-gray-300 p-2 rounded-md">
-        <button @click="addTime" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md">Add</button>
+        <button @click="addTime" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-full shadow-md">Add</button>
       </div>
     </div>
-    <button @click="saveData" class="mt-2 px-4 py-2 bg-green-400 text-white rounded-md"> Save</button>
+    <button @click="saveData" class="mt-2 px-4 py-2 bg-green-400 text-white rounded-full shadow-md"> Save</button>
   </div>
 </template>
 

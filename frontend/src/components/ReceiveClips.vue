@@ -71,7 +71,7 @@ async function receiveClips() {
 
 <template>
   <div v-if="!LoadingState">  <!-- Corrected condition -->
-    <button @click="receiveClips">Receive new Clips</button>
+    <button  @click="receiveClips">Receive new Clips</button>
     <button @click="handleGenerateSubtitles">Convert ALL for TikTok</button>
   </div>
   <p v-else>Loading Clips...</p>

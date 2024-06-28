@@ -1,8 +1,9 @@
 <template>
+  
+  <header></header>
   <div>
-    <nav class="flex items-center justify-between flex-wrap bg-blue-500 p-6">
-      <!-- Your navigation content -->
-    </nav>
+
+
     <div class="flex items-center justify-center h-screen">
       <div class="w-full max-w-xs">
         <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" @submit.prevent="login">
@@ -26,7 +27,7 @@
           </div>
           <div class="flex items-center justify-between">
             <button
-              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
               type="submit">
               Log In
             </button>
@@ -41,6 +42,7 @@
 <script>
 
 import backButton from '@/components/backButton.vue';
+import Header from '@/components/Header.vue';
 export default {
   data() {
     return {
@@ -79,7 +81,8 @@ export default {
     }
   },
   components: {
-    'back-button': backButton
+    'back-button': backButton,
+    'header': Header
   },
 };
 </script>

@@ -1,6 +1,13 @@
 package de.neiox.utls;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import kong.unirest.json.JSONObject;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 public class Vars {
     private static Dotenv dotenv;
@@ -31,6 +38,58 @@ public class Vars {
     public static String getDbConnectionString() {
         return getEnvVar("DB_CONNECTION_STRING", "mongodb://ADMIN:Admin123@172.17.0.2:27017");
     }
+
+
+    public static String getTwitchClientID() {
+        return getEnvVar("TWITCH_CLIENT_ID", "");
+    }
+
+    public static String getTwitchClientSecret() {
+        return getEnvVar("TWITCH_CLIENT_SECRET", "");
+    }
+
+
+    public static String getAuthToken() {
+        try {
+            // Define the URL for the POST request
+            URL url = new URL("https://id.twitch.tv/oauth2/token");
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            httpURLConnection.setDoOutput(true);
+
+            // Define the request body with client credentials
+            String client_id = getTwitchClientID();
+            String client_secret = getTwitchClientSecret();
+            String grant_type = "client_credentials";
+            String requestBody = "client_id=" + client_id
+                    + "&client_secret=" + client_secret
+                    + "&grant_type=" + grant_type;
+
+            // Write the request body to the output stream
+            try (OutputStream outputStream = httpURLConnection.getOutputStream()) {
+                byte[] input = requestBody.getBytes(StandardCharsets.UTF_8);
+                outputStream.write(input, 0, input.length);
+            }
+
+            // Get the response from the input stream
+            int responseCode = httpURLConnection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                try (Scanner scanner = new Scanner(httpURLConnection.getInputStream(), StandardCharsets.UTF_8.name())) {
+                    String jsonResponse = scanner.useDelimiter("\\A").next();
+                    JSONObject jsonObject = new JSONObject(jsonResponse);
+                    return jsonObject.getString("access_token");
+                }
+            } else {
+                System.out.println("Error: " + responseCode);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    };
 
     // Getter for DeepL Auth Key
     public static String getDeepLAuthKey() {

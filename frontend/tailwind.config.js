@@ -4,6 +4,11 @@ module.exports = {
   purge: ['./public/index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {
+
+      fontFamily:{
+          'rounded':["M PLUS Rounded 1c"]
+
+      },
       backgroundImage: {
         'gradient-to-r': 'linear-gradient(to right, #a855f7, #4f46e5)',
       },

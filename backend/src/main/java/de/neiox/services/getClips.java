@@ -3,6 +3,7 @@ package de.neiox.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.neiox.utls.Vars;
 import de.neiox.utls.requestHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -142,7 +143,10 @@ public class getClips implements Runnable{
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
             // Set the Client-ID header for authentication
-            connection.setRequestProperty("Client-ID", "a21zjh9htub57nqweuoe5ug197eodg");
+            connection.setRequestProperty("Client-ID", Vars.getTwitchClientID());
+
+
+
 
             // Get the input stream for the clip
             InputStream inputStream = connection.getInputStream();

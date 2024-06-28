@@ -9,8 +9,10 @@ import java.net.URL;
 
 public class requestHandler {
 
-    private static String Auth = "Bearer dh9c9di6800h6yg637svdyxv760322";
-    private static String CliendID = "a21zjh9htub57nqweuoe5ug197eodg";
+
+    static String authToken = Vars.getAuthToken();
+    private static String Auth = "Bearer "+ authToken;
+    private static String CliendID = Vars.getTwitchClientID();
     public static String getRequest(String url) {
         try {
             URL http = new URL(url);

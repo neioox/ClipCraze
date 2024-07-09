@@ -1,6 +1,11 @@
 <template>
+
+  <button v-if="selectedClips.length > 0" @click="addClipstoQueue">Add clips to queue</button>
+
   <div class="flex flex-wrap pl-10">
-    <div v-for="(clip, index) in clips" :key="index" class="w-1/4 m-4">
+    <div v-for="(clip, index) in clips" :key="index" class="w-1/4 m-4"
+      :class="{ 'border-4  border-purple-600 shadow-2xl rounded-md': isSelected(clip) }"
+      @click="toggleSelectClip(clip)">
       <h2 class="text-xl, font-bold" v-text="clip"></h2>
       <div>
         <video class="w-500 h-300 rounded-lg" :src="'http://localhost:8080/api/getclips/' + clip" controls></video>
@@ -21,16 +26,59 @@
 
 
 <script setup>
-import genSubTitels from './genSubTitels.vue';
+
 import DeleteClip from './DeleteClip.vue';
 import DownloadSubs from './DownloadSubtitles.vue';
-import { provide, ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import router from '../main.js'
 
 const clips = ref([]);
 const subtitlesExist = ref({});
 
 
+
+const selectedClips = ref([]);
+
+function isSelected(clip) {
+  return selectedClips.value.includes(clip);
+}
+
+function toggleSelectClip(clip) {
+  const index = selectedClips.value.indexOf(clip);
+  if (index !== -1) {
+    selectedClips.value.splice(index, 1);  // Remove clip from selected clips if it's already selected
+  } else {
+    selectedClips.value.push(clip);  // Add clip to selected clips if it's not already selected
+  }
+}
+
+
+const addClipstoQueue = async () => {
+  if (selectedClips.value.length > 0) {
+
+    const formData = new FormData();
+   
+    selectedClips.value.forEach(clip => {
+      formData.append('clip', clip);  
+    });
+   
+  
+
+    const response = await fetch('http://localhost:8080/api/createQueue/', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Invalid');
+    }
+
+    const data = await response.json();
+    console.log(data.response);
+
+  }
+
+}
 
 const navigateToSettings = async (Clip) => {
   try {
@@ -48,7 +96,7 @@ const recieveclipList = async () => {
     const response = await fetch("http://localhost:8080/api/clips");
     const clipList = await response.json();
     clips.value = clipList;
-   // console.log(clipList)
+    // console.log(clipList)
     localStorage.setItem("clips", clipList)
     await Promise.all(clipList.map(async (clipName) => {
       const subExist = await subExists(clipName);
@@ -56,7 +104,7 @@ const recieveclipList = async () => {
     }));
 
 
-    
+
     let subtitlesExistsResponse = await fetch("http://localhost:8080/api/checksubtitle/" + clipName);
     let subtitlesExists = await subtitlesExistsResponse.json();
 
@@ -84,12 +132,12 @@ onMounted(() => {
 
 
 export const subExists = async (clipName) => {
- 
-    const subtitelsExistsResponse = await fetch("http://localhost:8080/api/checksubtitle/" + clipName);
-    const subtitelsExists = await subtitelsExistsResponse.json();
-    console.log(subtitelsExists);
-    return subtitelsExists.Exists;
-  
+
+  const subtitelsExistsResponse = await fetch("http://localhost:8080/api/checksubtitle/" + clipName);
+  const subtitelsExists = await subtitelsExistsResponse.json();
+  console.log(subtitelsExists);
+  return subtitelsExists.Exists;
+
 };
 
 </script>

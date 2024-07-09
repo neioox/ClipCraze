@@ -21,10 +21,6 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
 
-
-
-
-
         Path tempFile = FileHandler.copyResourceToTempFile("/LEMONMILK-Bold.otf");
         FontHandler.installFonts(tempFile.toFile());
         String modifiedString = tempFile.toString().replaceAll("\\\\", "/");
@@ -39,8 +35,6 @@ public class Main {
 
         Setup setup = new Setup();
         setup.checkForFolders();
-
-        getClips getClips = new getClips();
 
 
         ScheduledExecutorService service = Executors.newScheduledThreadPool(4);

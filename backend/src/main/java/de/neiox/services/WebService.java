@@ -2,6 +2,7 @@ package de.neiox.services;
 
 import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
+import de.neiox.queue.QueueManager;
 import de.neiox.services.Auth.Auth;
 import de.neiox.utls.requestHandler;
 import io.javalin.Javalin;
@@ -76,14 +77,6 @@ public class WebService {
             ctx.redirect("/index.html");
         });
 
-        app.post("/api/crop4tiktok/{filename}/{format}", ctx ->{
-            String filename = ctx.pathParam("filename");
-            String format = ctx.pathParam("format");
-
-            System.out.println(format);
-            String result = aiService.crop4tiktok(filename, format);
-            ctx.json(result);
-        });
 
 
         app.post("/api/convert4tiktok/v2/{filename}", ctx ->{
@@ -94,11 +87,6 @@ public class WebService {
             ctx.json(result);
         });
 
-        app.post("/api/addsubtitles2vid/{filename}", ctx ->{
-            String filename = ctx.pathParam("filename");
-            String result = aiService.convertclip2tt(filename);
-            ctx.json(result);
-        });
 
         app.post("/api/generateText/{text}", ctx ->{
             String text = ctx.pathParam("text");
@@ -349,6 +337,31 @@ public class WebService {
 
 
 
+        app.post("/api/twitch/downloadclip", ctx -> {
+
+            Random rand = new Random();
+
+            String userid = ctx.formParam("userid");
+            String twitchClipUrl = ctx.formParam("url");
+            int id = rand.nextInt();
+
+            try {
+
+               String filename =  getClips.downloadClip(twitchClipUrl, id , userid);
+
+                if (filename != "") {
+                    ctx.result("{\"response\": \"downloaded sucessfull\"}");
+                } else {
+                    ctx.status(500).result("{\"response\": \"error\"}");
+                }
+
+            } catch (Exception e) {
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        });
+
+
+
         app.post("/api/addUser/", ctx ->{
             String Username = ctx.formParam("username");
             String Password = ctx.formParam("password");
@@ -377,7 +390,23 @@ public class WebService {
         });
 
 
+        app.post("api/createQueue/", ctx ->{
+            List<String> clips = ctx.formParams("clip");
+            String userid = ctx.formParam("userid");
+            try {
 
+
+            QueueManager queueManager = new QueueManager();
+            queueManager.createQueue(clips);
+            queueManager.processQueue();
+            ctx.result("{\"response\":  Clips processed succesfully!}");
+
+            }catch (Exception e){
+
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+
+            }
+        });
 
         app.post("/api/addClip/", ctx ->{
             String Name = ctx.queryParam("Name");

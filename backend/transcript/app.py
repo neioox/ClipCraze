@@ -6,11 +6,13 @@ from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 from moviepy.video.tools.subtitles import SubtitlesClip
 from moviepy.video.fx.all import crop
 from moviepy.editor import *
+from sqlalchemy import null
 import stable_whisper
 from langchain.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler 
 import logging
+import threading
 #from modules.faceDetection import get_face_position
 
 
@@ -21,20 +23,24 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 
-whisper_model = "medium"
-ollama_model = "llama2-uncensored"
+def load_models():
 
-print("Loading ai models...")
-print("Loading Whisper ai... model: "+ whisper_model)
-model =  stable_whisper.load_model(whisper_model)
-print("Whisper model loaded.")
-print("loading ollama model: "+ ollama_model)
+    global model 
+    global llm 
+    # Declare llm as a global variable
+    whisper_model = "medium"
+    ollama_model = "llama2-uncensored"
 
-llm = Ollama(model= ollama_model, callback_manager= CallbackManager([StreamingStdOutCallbackHandler]))
-print("ollama model loaded")
-print("DONE!")
-logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+    print("Loading ai models...")
+    print("Loading Whisper ai... model: "+ whisper_model)
+    model =  stable_whisper.load_model(whisper_model)
+    print("Whisper model loaded.")
+    print("loading ollama model: "+ ollama_model)
+
+    llm = Ollama(model= ollama_model, callback_manager= CallbackManager([StreamingStdOutCallbackHandler]))
+    print("ollama model loaded")
+    print("DONE!")
+
 
 def success_response(message):
     return jsonify({"success": True, "message": message})
@@ -205,5 +211,13 @@ def generate_subtitle(filename):
         return error_response("File not found.")
 
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+print("Starting the Python API...")
+
 if __name__ == "__main__":
-    app.run(debug=False)
+    threading.Thread(target=load_models).start()
+    #load_models()
+    app.run(debug=False, port=5000, host='0.0.0.0')
+    print("python api is running")

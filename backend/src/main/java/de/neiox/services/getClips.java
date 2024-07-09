@@ -29,19 +29,19 @@ import java.util.stream.Collectors;
 
 public class getClips implements Runnable{
     // Get the current date and time
-    LocalDateTime now = LocalDateTime.now();
+    static LocalDateTime now = LocalDateTime.now();
 
     // Subtract 7 days to get the date of last week
     LocalDateTime lastWeek = now.minusDays(10);
 
     // Define the desired date and time format
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'");
+    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'");
 
     // Format the last week date using the formatter
     String formattedLastWeek = lastWeek.format(formatter);
 
     // Format the current date and time using the formatter
-    String formattedDateTime = now.format(formatter);
+    static String formattedDateTime = now.format(formatter);
 
     String url = "";
 
@@ -52,7 +52,6 @@ public class getClips implements Runnable{
       List<String> streamers =   mongoDB.getStreamersNameFromUser(id);
 
       System.out.println(streamers);
-
 
         for (String element : streamers) {
 
@@ -129,7 +128,7 @@ public class getClips implements Runnable{
         return clips;
     }
 
-    private void downloadClip(String clipUrl, int id, String userID){
+    public static String downloadClip(String clipUrl, int id, String userID){
 
         try {
             String getAsset = requestHandler.getRequest("https://api.efuse.gg/api/sidekick/twitch-clip?url="+ clipUrl);
@@ -144,9 +143,6 @@ public class getClips implements Runnable{
 
             // Set the Client-ID header for authentication
             connection.setRequestProperty("Client-ID", Vars.getTwitchClientID());
-
-
-
 
             // Get the input stream for the clip
             InputStream inputStream = connection.getInputStream();
@@ -173,9 +169,9 @@ public class getClips implements Runnable{
             connection.disconnect();
 
             System.out.println("Clip downloaded successfully: " + fileName);
-
+            return  fileName;
         } catch (IOException e) {
-
+            return "";
         }
     }
 

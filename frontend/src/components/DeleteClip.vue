@@ -25,7 +25,3 @@ async function deleteClip(event) {
   }
 }
 </script>
-<style>
-
-
-</style>

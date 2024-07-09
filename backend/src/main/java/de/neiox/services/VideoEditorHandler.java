@@ -2,7 +2,7 @@ package de.neiox.services;
 
 import de.neiox.manager.FileHandler;
 import de.neiox.wrapper.FfmpegWrapper;
-import de.neiox.wrapper.assets.Font;
+
 
 import java.io.File;
 import java.nio.file.Path;
@@ -38,7 +38,6 @@ public class VideoEditorHandler {
             }
 
 
-           // FfmpegWrapper.addSrtFile(inputFile, SuboutputFile, SrtFile, new Font("Komika Axis", 23, "FFFFFF",  fontPath.toString()));
 
             FfmpegWrapper.addSubtitleWithFont(inputFile, SrtFile, "Komika Axis", SuboutputFile);
             FfmpegWrapper.applyBoxBlur(inputFile, BlurredVideo, 13);
@@ -51,6 +50,5 @@ public class VideoEditorHandler {
             System.err.println(e.toString());
             return e.toString();
         }
-
     }
 }

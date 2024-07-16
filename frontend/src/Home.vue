@@ -12,6 +12,8 @@
     <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png" alt="Robot" width="100" height="100" />
     <h1 class="font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent p-6 text-7xl">ClipCraze</h1>
   </div>
+
+    <ClipDownloaderTextfield></ClipDownloaderTextfield>  
     <ReceiveClips></ReceiveClips>
     <ClipsList></ClipsList>
     
@@ -30,6 +32,8 @@ import ReceiveClips from './components/ReceiveClips.vue';
 import Login from './views/Login.vue';
 import router from './main.js'
 import Header from './components/Header.vue';
+import ClipDownloaderTextfield from './components/ClipDownloaderTextfield.vue';
+
 
 if (localStorage.getItem("username") || localStorage.getItem("token") ) {
 

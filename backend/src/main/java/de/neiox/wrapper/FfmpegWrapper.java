@@ -53,13 +53,13 @@ public class FfmpegWrapper {
         }
     }
 
-    public static void addSubtitleWithFont(String videoPath, String subtitlePath, String fontName, String outputVideoPath) {
+    public static void addSubtitleWithFont(String videoPath, String subtitlePath, String fontName, int fontSize, String outputVideoPath) {
         try {
-            // FFmpeg command to add subtitle with custom font
+            // FFmpeg command to add subtitle with custom font and size
             String[] command = {
                     "ffmpeg",
                     "-i", videoPath,
-                    "-vf", String.format("subtitles='%s:force_style=FontName=%s'", subtitlePath, fontName),
+                    "-vf", String.format("subtitles='%s:force_style=FontName=%s,FontSize=%d'", subtitlePath, fontName, fontSize),
                     "-c:a", "copy",
                     "-y", outputVideoPath
             };

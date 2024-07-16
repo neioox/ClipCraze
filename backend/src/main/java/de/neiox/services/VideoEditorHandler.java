@@ -39,7 +39,7 @@ public class VideoEditorHandler {
 
 
 
-            FfmpegWrapper.addSubtitleWithFont(inputFile, SrtFile, "Komika Axis", SuboutputFile);
+            FfmpegWrapper.addSubtitleWithFont(inputFile, SrtFile, "Komika Axis", 24, SuboutputFile);
             FfmpegWrapper.applyBoxBlur(inputFile, BlurredVideo, 13);
             FfmpegWrapper.cropVideoForTikTok(BlurredVideo, CroppedVideo);
             FfmpegWrapper.addCenteredResizedOverlay(CroppedVideo, SuboutputFile, finalClip);

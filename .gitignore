@@ -31,3 +31,4 @@ backend/target/
 backend/Clips/
 backend/transcript/SrtFiles/
 backend/.env
+backend/.env

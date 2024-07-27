@@ -2,6 +2,7 @@ package de.neiox.services;
 
 import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
+import de.neiox.models.Setting;
 import de.neiox.queue.QueueManager;
 import de.neiox.services.Auth.Auth;
 import de.neiox.utls.requestHandler;
@@ -28,6 +29,7 @@ import static de.neiox.services.SubititelsEditor.editSubtitleSegment;
 //TODO: Check for every request the token
 
 public class WebService {
+    getClips getClips = new getClips();
 
 
     AIService aiService = new AIService();
@@ -81,7 +83,7 @@ public class WebService {
 
         app.post("/api/convert4tiktok/v2/{filename}", ctx ->{
             String filename = ctx.pathParam("filename");
-
+            
             String result = VideoEditorHandler.convertClipToShortVid(filename);
 
             ctx.json(result);
@@ -106,48 +108,69 @@ public class WebService {
         });
 
 
+        app.post("api/uploadFiletoDiscord", ctx -> {
+
+            String id =ctx.formParam("id");
+            String filePath = ctx.formParam("Filepath");
+
+            try {
+                WebhookService webhookService = new WebhookService();
+                webhookService.sendFiletoWebhook(id, filePath);
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+
+            }
+            ctx.result("{\"response\": uploadede File}");
+
+
+        });
+
 
 
         app.post("/api/requestClips", ctx -> {
 
             String id = ctx.formParam("id");
-            getClips getClips = new getClips();
 
-           List<String> clips =  getClips.getAllClipsFromUser(id);
+            List<String> clips =  getClips.getAllClipsFromUser(id);
 
-           if (!clips.isEmpty()){
+            if (!clips.isEmpty()){
 
-               String filename = "";
-               for (int i = 0; i < clips.size(); i++) {
+                String filename = "";
+                for (int i = 0; i < clips.size(); i++) {
 
 
-                   filename = clips.get(i);
-                   Path mp4File = Paths.get("Clips", filename);
-                   Path subFile = Paths.get("transcript/SrtFiles", filename + ".srt");
+                    filename = clips.get(i);
+                    Path mp4File = Paths.get("Clips", filename);
+                    Path subFile = Paths.get("transcript/SrtFiles", filename + ".srt");
 
-                   try {
-                       Files.delete(mp4File);
-                       if (Files.exists(subFile)) {
-                           Files.delete(subFile);
-                       }
-                   } catch (Exception e) {
-                       ctx.status(555).result(e.toString());
+                    try {
+                        Files.delete(mp4File);
+                        if (Files.exists(subFile)) {
+                            Files.delete(subFile);
+                        }
+                    } catch (Exception e) {
+                        ctx.status(555).result(e.toString());
 
-                   }
-               }
-           }
+                    }
+                }
+            }
 
             getClips.requestClips(id);
 
             ctx.result("Downloaded all clips of today!");
         });
 
+
         app.get("/api/clips", ctx -> {
             Path dir = Paths.get("Clips");
 
 
             List<String> videos = Files.list(dir)
-                    .filter(path -> !path.getFileName().toString().contains("w_subs"))
+                    .filter(path -> !path.getFileName().toString().contains("w_subs") ||
+                            !path.getFileName().toString().contains("final")||
+                            !path.getFileName().toString().contains("blurred")||
+                            !path.getFileName().toString().contains("cropped"))
                     .map(Path::getFileName)
                     .map(Path::toString)
                     .collect(Collectors.toList());
@@ -347,7 +370,7 @@ public class WebService {
 
             try {
 
-               String filename =  getClips.downloadClip(twitchClipUrl, id , userid);
+                String filename =  getClips.downloadClip(twitchClipUrl, id , userid);
 
                 if (filename != "") {
                     ctx.result("{\"response\": \"downloaded sucessfull\"}");
@@ -396,10 +419,10 @@ public class WebService {
             try {
 
 
-            QueueManager queueManager = new QueueManager();
-            queueManager.createQueue(clips);
-            queueManager.processQueue();
-            ctx.result("{\"response\":  Clips processed succesfully!}");
+                QueueManager queueManager = new QueueManager();
+                queueManager.createQueue(clips);
+                queueManager.processQueue();
+                ctx.result("{\"response\":  Clips processed succesfully!}");
 
             }catch (Exception e){
 
@@ -431,7 +454,7 @@ public class WebService {
 
             try{
 
-             String  result = mongoDB.getAllUsers().toString();
+                String  result = mongoDB.getAllUsers().toString();
 
                 ctx.result("{\"response\": "+ result + "}");
             }catch (Exception e){
@@ -445,7 +468,6 @@ public class WebService {
             String userid = ctx.pathParam("userid");
 
             try {
-                getClips getClips = new getClips();
                 String result = getClips.getAllClipsFromUser(userid).toString();
                 ctx.result("{\"response\": " + result + "}");
             } catch (Exception e) {
@@ -459,7 +481,6 @@ public class WebService {
             String userid = ctx.pathParam("userid");
 
             try {
-                getClips getClips = new getClips();
                 List<String> result = getClips.getFinishedClipsFromUser(userid);
                 ctx.json(result);
             } catch (Exception e) {
@@ -478,7 +499,7 @@ public class WebService {
             System.out.println(Date+ Time);
 
             try{
-                mongoDB.createSettings(Date, Time, assignedUser);
+                mongoDB.createShedule(Date, Time, assignedUser);
                 ctx.result("{\"response\": \"Inserted "+ Date  + "\"}");
             }catch (Exception e){
                 ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
@@ -494,7 +515,7 @@ public class WebService {
 
             try{
 
-                List<String> schedules = mongoDB.getSettingsFromUser(id);
+                List<String> schedules = mongoDB.getSchedulesFromUser(id);
 
 
                 ctx.result("{\"schedules\": "+ schedules + "}");
@@ -504,6 +525,36 @@ public class WebService {
 
             }
         });
+
+
+        app.post("/api/addSettings", ctx -> {
+            String webhook = ctx.formParam("webhook");
+            String assignedUser = ctx.formParam("id");
+
+            mongoDB.createSettings(webhook, assignedUser);
+
+
+            ctx.result("{\"response\": \"  inserted Settings sucesfully \"}");
+
+        });
+
+        app.get("/api/getSettings/{id}", ctx -> {
+            String assignedUser = ctx.pathParam("id");
+            System.out.println("Requested ID: " + assignedUser);
+            JSONObject jsonObject = new JSONObject();
+
+            Setting setting = mongoDB.getSettingsFromUser(assignedUser);
+
+            if(setting != null){
+
+                String webhook = setting.getWebhook();
+                jsonObject.put("webhook", webhook);
+
+            }
+
+            ctx.result(jsonObject.toString());
+        });
+
 
 
 
@@ -534,20 +585,20 @@ public class WebService {
 
 
         app.delete("/api/delete/streamer", ctx -> {
-           String id = ctx.formParam("id");
-           String StreamerName = ctx.formParam("streamername");
+            String id = ctx.formParam("id");
+            String StreamerName = ctx.formParam("streamername");
 
 
-           try{
+            try{
 
-               mongoDB.deleteStreamer(StreamerName, id);
-               ctx.result("{\"response\": Deleted Streamer!}");
+                mongoDB.deleteStreamer(StreamerName, id);
+                ctx.result("{\"response\": Deleted Streamer!}");
 
-           }catch (Exception e){
+            }catch (Exception e){
 
-               ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
+                ctx.status(500).result("{\"error\": \"" + e.getMessage() + "\"}");
 
-           }
+            }
         });
         app.post("/api/get/streamer", ctx -> {
             String id = ctx.formParam("id");
@@ -610,4 +661,4 @@ public class WebService {
             }
         });
     }
-    }
+}

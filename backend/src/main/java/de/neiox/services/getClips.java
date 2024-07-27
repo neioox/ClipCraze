@@ -19,12 +19,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class getClips implements Runnable{
@@ -51,18 +50,14 @@ public class getClips implements Runnable{
 
       List<String> streamers =   mongoDB.getStreamersNameFromUser(id);
 
-      System.out.println(streamers);
 
         for (String element : streamers) {
 
             String username = element.toLowerCase(Locale.ROOT).replace("\"", "");
             String url = "https://api.twitch.tv/helix/users?login=" + username;
-            System.out.println(url);
 
             String userinfo = requestHandler.getRequest(url);
-            System.out.println(userinfo);
             JSONObject jsonResponse = new JSONObject(userinfo.toString());
-            System.out.println(jsonResponse);
 
             JSONArray dataArray = jsonResponse.getJSONArray("data");
             if (!dataArray.isEmpty()) {
@@ -109,7 +104,14 @@ public class getClips implements Runnable{
      public List<String> getAllClipsFromUser(String id) throws IOException {
          Path dir = Paths.get("Clips");
          List<String> Clips = Files.list(dir)
-                 .filter(path -> !path.getFileName().toString().contains("w_subs") || path.getFileName().toString().contains(id))
+             .filter(path -> !path.getFileName().toString().contains("w_subs") ||
+                     path.getFileName().toString().contains(id) ||
+                     !path.getFileName().toString().contains("final")||
+                     !path.getFileName().toString().contains("blurred")||
+                     !path.getFileName().toString().contains("cropped")
+             )
+
+
                  .map(Path::getFileName)
                  .map(Path::toString)
                  .collect(Collectors.toList());
@@ -128,7 +130,24 @@ public class getClips implements Runnable{
         return clips;
     }
 
-    public static String downloadClip(String clipUrl, int id, String userID){
+
+    public File getSpecificClipFromUser(String id, String clipName) throws IOException {
+        Path dir = Paths.get("Clips");
+
+        try (Stream<Path> files = Files.list(dir)) {
+            // Find the first file that matches the given criteria
+            Optional<Path> clip = files
+                    .filter(path -> path != null && path.getFileName() != null &&
+                            path.getFileName().toString().contains(id != null ? id : "") &&
+                            path.getFileName().toString().contains(clipName != null ? clipName : ""))
+                    .findFirst();
+
+            // If a matching file is found, return it as a File object
+            return clip.orElseThrow(() -> new IOException("No matching clip found")).toFile();
+        }
+    }
+
+    public static String downloadClip(String clipUrl, int id, String userID) throws IOException {
 
         try {
             String getAsset = requestHandler.getRequest("https://api.efuse.gg/api/sidekick/twitch-clip?url="+ clipUrl);
@@ -168,10 +187,10 @@ public class getClips implements Runnable{
             outputStream.close();
             connection.disconnect();
 
-            System.out.println("Clip downloaded successfully: " + fileName);
             return  fileName;
         } catch (IOException e) {
-            return "";
+
+            throw new IOException();
         }
     }
 

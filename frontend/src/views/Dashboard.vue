@@ -8,6 +8,10 @@
   <div>
     <h2 class="text-xl font-bold mb-4">Streamer List</h2>
 
+
+
+
+
     <!-- Table to display streamers -->
     <table class="w-full rounded-lg overflow-hidden shadow-lg">
   <thead class="bg-gray-100">
@@ -44,18 +48,23 @@
 import ShedulePanel from '@/components/ShedulePanel.vue';
 import BackButton from '@/components/backButton.vue';
 import Header from '@/components/Header.vue';
-
+import { ref } from 'vue';
 
 export default {
   data() {
     return {
       username: '',
       streamers: [], // Initialize streamers array to store streamer names
-      newStreamer: '' // Initialize newStreamer data property to bind to the input field
+      newStreamer: '', // I
     };
   },
 
   methods: {
+
+    
+ 
+
+
     async getStreamers() {
       if (this.streamers.length === 0) {
         const formData = new FormData();
@@ -138,6 +147,9 @@ export default {
         // Handle error here
       } 
     }
+
+
+    
   },
 
   components: {
@@ -149,6 +161,7 @@ export default {
   async mounted() {
     this.username = localStorage.getItem('username') || 'Guest';
     await this.getStreamers();
+    await this.fetchWebhook();
   }
 };
 </script>

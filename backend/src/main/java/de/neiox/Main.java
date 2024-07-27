@@ -5,6 +5,7 @@ import de.neiox.manager.FileHandler;
 import de.neiox.services.*;
 import de.neiox.services.database.Handler.HandleNewOrUpdatesSchedules;
 import de.neiox.services.database.MongoDB;
+import de.neiox.utls.Vars;
 import de.neiox.wrapper.FfmpegWrapper;
 
 
@@ -25,26 +26,22 @@ public class Main {
         FontHandler.installFonts(tempFile.toFile());
         String modifiedString = tempFile.toString().replaceAll("\\\\", "/");
         modifiedString = modifiedString.replaceAll("C:/", "");
-        System.out.println(modifiedString);
         FfmpegWrapper.testFont(modifiedString);
 
-        FontHandler.printAllInstalledFonts();
-        System.out.println("PENIS");
         mongoDB.connectToDatabase();
         HandleNewOrUpdatesSchedules handleNewOrUpdatesSchedules = new HandleNewOrUpdatesSchedules();
 
         Setup setup = new Setup();
         setup.checkForFolders();
 
-
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(4);
+                ScheduledExecutorService service = Executors.newScheduledThreadPool(4);
         service.scheduleAtFixedRate(new Runnable() {
             int count = 0;
             @Override
             public void run() {
                 try {
-                    System.out.println("Running " + (++count) + " times");
-                    handleNewOrUpdatesSchedules.checkForUpdates("Schedules");
+                  
+                  handleNewOrUpdatesSchedules.checkForUpdates("Schedules");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -52,7 +49,6 @@ public class Main {
         }, 0, 1, TimeUnit.MINUTES);
 
 
-        System.out.println("test");
 
         WebService.webserver(8080);
     }

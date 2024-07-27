@@ -1,12 +1,12 @@
 package de.neiox.services.database;
 
-import com.mongodb.Block;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
+import de.neiox.models.Setting;
 import de.neiox.utls.Vars;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -57,15 +57,11 @@ public class MongoDB {
                             !collectionExist("Schedules"))
 
             {
-                System.out.println("Creating Tables...");
                 createCollection("Users");
                 createCollection("Clips");
                 createCollection("Streamers");
                 createCollection("Settings");
                 createCollection("Schedules");
-                System.out.println("done!");
-            } else {
-                System.out.println("Tables do exist!");
             }
         } catch (Exception e){
             throw new Exception(e);
@@ -107,8 +103,8 @@ public class MongoDB {
         }else {
 
             return "user exists";
-            }
         }
+    }
 
     public void createClip(String name, int ttl, String streamer, String duration, String filename){
         MongoCollection<Document> collection = db.getCollection("Clips");
@@ -126,27 +122,24 @@ public class MongoDB {
 
         MongoCollection<Document> collection = db.getCollection("Users");
         Document userdoc = collection.find(Filters.eq("Username", Username)).first();
-        System.out.println(userdoc);
 
         if (userdoc != null) {
 
             String hashedpassword = userdoc.getString("Password");
-            System.out.println(hashedpassword);
-            System.out.println(Password);
+
 
 
             // Check that an unencrypted password matches one that has
             // previously been hashed+
             Boolean test = BCrypt.checkpw(Password,hashedpassword);
 
-            System.out.println(test);
+
             if (BCrypt.checkpw(Password,hashedpassword))
                 return true;
             else
                 return false;
 
         } else {
-            System.out.println("No user found with username"+ Username);
             return false;
         }
     }
@@ -158,10 +151,10 @@ public class MongoDB {
         Document doc = new Document("Name", name)
                 .append("assigend", assignedUser);
 
-                collection.insertOne(doc);
+        collection.insertOne(doc);
     }
 
-    public void createSettings(String days, String time, String assignedUser) {
+    public void createShedule(String days, String time, String assignedUser) {
         try {
             String[] dayParts = days.split(", ");
             String[] timeParts = time.split(", ");
@@ -177,45 +170,121 @@ public class MongoDB {
 
             Document document =  collection.find(Filters.eq("assigned", assignedUser)).first();
 
-    if (document  == null){
+            if (document  == null){
 
 
+                // Create a document for each schedule timestamp and save it to the collection
+                Document doc = new Document("Weekdays", dayList)
+                        .append("Times", timeList)
+                        .append("assigned", assignedUser);
 
-            // Create a document for each schedule timestamp and save it to the collection
-            Document doc = new Document("Weekdays", dayList)
-                    .append("Times", timeList)
-                    .append("assigned", assignedUser);
+                // Insert the document into the MongoDB collection
+                collection.insertOne(doc);
+            }else {
 
-            // Insert the document into the MongoDB collection
-            collection.insertOne(doc);
-    }else {
+                collection.updateOne(Filters.eq("assigned", assignedUser),
+                        Updates.combine(Updates.set("Times", timeList), Updates.set("Weekdays", dayList)));
 
-        collection.updateOne(Filters.eq("assigned", assignedUser),
-                Updates.combine(Updates.set("Times", timeList), Updates.set("Weekdays", dayList)));
-
-    }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public List<String> getSettingsFromUser(String id){
+
+
+
+
+    public List<String> getSchedulesFromUser(String id){
         MongoCollection<Document> collection = db.getCollection("Schedules");
-        System.out.println(id);
+
         FindIterable<Document> settingsdocs = collection.find(Filters.eq("assigned", id));
-        System.out.println(settingsdocs);
+
         List<String> results = new ArrayList<>();
         for (Document doc : settingsdocs) {
-            System.out.println(doc);
+
             results.add(doc.toJson());
         }
         return results;
     }
 
-    public void deleteSettings(String id){
+
+
+
+
+    public void createSettings(String webhook, String assignedUser) throws Exception {
+        try {
+            MongoCollection<Document> collection = db.getCollection("Settings");
+            Document document = collection.find(Filters.eq("assigned", assignedUser)).first();
+
+            if (document == null) {
+                Document newDoc = new Document("webhook", encryptWebhook(webhook))
+                        .append("assigned", assignedUser);
+                collection.insertOne(newDoc);
+            } else {
+                collection.updateOne(Filters.eq("assigned", assignedUser),
+                        Updates.combine(Updates.set("webhook", encryptWebhook(webhook))));
+
+            }
+        } catch (Exception e) {
+        throw  new Exception(e);
+        }
+    }
+
+
+
+
+    public Setting getSettingsFromUser(String id) {
+        MongoCollection<Document> collection = db.getCollection("Settings");
+        Document doc = collection.find(Filters.eq("assigned", id)).first();
+
+
+        String cryptedWebhook = doc.getString("webhook");
+        String docid = doc.getString("id");
+        String decodedUrl = new String(Base64.getDecoder().decode(cryptedWebhook));
+        Setting setting = new Setting(docid, decodedUrl, id);
+
+        return setting;
+    }
+
+
+    public String getWebhookFromUser(String id){
+
+        MongoCollection<Document> collection = db.getCollection("Settings");
+        FindIterable<Document> settingsdocs = collection.find(Filters.eq("assigned", id));
+        Document firstDoc = settingsdocs.first();
+
+        if (firstDoc != null) {
+            Object webhookUrlCrypted = firstDoc.get("webhook");
+
+            if (webhookUrlCrypted instanceof String) {
+                String encryptedUrl = (String) webhookUrlCrypted;
+                String decodedUrl = new String(Base64.getDecoder().decode(encryptedUrl));
+                return decodedUrl;
+            } else {
+                // Handle case where "Discord Webhook URL" is not a string
+                return null;
+            }
+        } else {
+            // Handle case where no document is found
+            return null;
+        }
+    };
+
+    private String encryptWebhook(String webhook) {
+        return Base64.getEncoder().encodeToString(webhook.getBytes());
+    }
+
+
+
+
+
+
+    public void deleteSchedules(String id){
         MongoCollection<Document> collection = db.getCollection("Schedules");
         collection.deleteOne(Filters.eq("id", id));
     }
+
 
 
 
@@ -233,15 +302,12 @@ public class MongoDB {
         MongoCollection<Document> collection = db.getCollection("Streamers");
         Document doc = collection.find(Filters.and(Filters.eq("Name", name), Filters.eq("assigend", id))).first();
 
-        System.out.println(name+ " "+ id);
 
         if (doc == null) {
-            System.out.println("cant find streamer");
             return;
         }
 
         collection.deleteOne(Filters.and(Filters.eq("Name", name), Filters.eq("assigend", id)));
-        System.out.println("Streamer deleted successfully.");
     }
 
 
@@ -293,11 +359,9 @@ public class MongoDB {
 
     public List<String> getStreamersFromUser(String id){
         MongoCollection<Document> collection = db.getCollection("Streamers");
-        System.out.println(id);
         FindIterable<Document> streamerDocs = collection.find(Filters.eq("assigend", id));
         List<String> results = new ArrayList<>();
         for (Document doc : streamerDocs) {
-            System.out.println(doc);
             results.add(doc.toJson());
         }
         return results;
@@ -305,11 +369,9 @@ public class MongoDB {
 
     public List<String> getStreamersNameFromUser(String id){
         MongoCollection<Document> collection = db.getCollection("Streamers");
-        System.out.println(id);
         FindIterable<Document> streamerDocs = collection.find(Filters.eq("assigend", id));
         List<String> results = new ArrayList<>();
         for (Document doc : streamerDocs) {
-            System.out.println(doc);
             String name = doc.getString("Name");
             if (name != null) {
                 results.add(name);
@@ -337,7 +399,6 @@ public class MongoDB {
     public void getClip(String name){
         MongoCollection<Document> collection = db.getCollection("Clips");
         Document myDoc = collection.find(Filters.eq("Name", name)).first();
-        System.out.println(myDoc.toJson());
     }
 
 
@@ -351,21 +412,18 @@ public class MongoDB {
         // Create a change stream
         ChangeStreamIterable<Document> changeStream = streamersCollection.watch();
 
-        System.out.println("test12456");
 
         // Create a cursor for the change stream
         MongoCursor<ChangeStreamDocument<Document>> cursor = changeStream.iterator();
 
-        System.out.println(cursor);
-        System.out.println(cursor.hasNext() + "sex");
+
         while (cursor.hasNext())
         {
             ChangeStreamDocument<Document> change = cursor.next();
-            System.out.println(change);
+
             Document doc = change.getFullDocument();
             String scheduleExpression = doc.getString("Times");
-            System.out.println(scheduleExpression);
-            System.out.println(doc);
+
         }
     }
 

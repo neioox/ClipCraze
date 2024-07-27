@@ -26,9 +26,10 @@ public class SubititelsEditor {
             // Update the content of the segment
             lines.set(index + 2, newContent);  // Assuming the content is on the third line after the segment ID
             Files.write(filePath, lines, StandardOpenOption.WRITE);
-            System.out.println("Subtitle segment with ID " + segmentId + " updated successfully.");
+
         } else {
-            System.out.println("Subtitle segment with ID " + segmentId + " not found.");
+
+            throw  new IOException();
         }
     }
 }

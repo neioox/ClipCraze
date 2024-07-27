@@ -7,6 +7,8 @@ import de.neiox.wrapper.FfmpegWrapper;
 import java.io.File;
 import java.nio.file.Path;
 
+
+
 public class VideoEditorHandler {
 
     public static String convertClipToShortVid(String filename) throws Exception {
@@ -17,13 +19,13 @@ public class VideoEditorHandler {
         String BlurredVideo = ClipDir + filename.replace(".mp4", "_blurred.mp4");
         String CroppedVideo = ClipDir + filename.replace(".mp4", "_cropped.mp4");
         String finalClip = ClipDir + filename.replace(".mp4", "_final.mp4");
-
+        WebhookService webhookService = new WebhookService();
         try {
 
             Path tempFile = FileHandler.copyResourceToTempFile("/KOMIKAX_.ttf");
 
 
-
+            assert tempFile != null;
             String fontPath = tempFile.toString().replaceAll("\\\\", "/");
             fontPath = fontPath.replaceAll("C:/", "");
 
@@ -39,15 +41,23 @@ public class VideoEditorHandler {
 
 
 
+            String userid = filename.split("_")[2];
+
+
             FfmpegWrapper.addSubtitleWithFont(inputFile, SrtFile, "Komika Axis", 24, SuboutputFile);
             FfmpegWrapper.applyBoxBlur(inputFile, BlurredVideo, 13);
             FfmpegWrapper.cropVideoForTikTok(BlurredVideo, CroppedVideo);
             FfmpegWrapper.addCenteredResizedOverlay(CroppedVideo, SuboutputFile, finalClip);
 
+
+            webhookService.sendFiletoWebhook(userid, filename);
+
+
+
             return "Converted video";
 
         } catch (Exception e) {
-            System.err.println(e.toString());
+            System.err.println(e);
             return e.toString();
         }
     }

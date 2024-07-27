@@ -60,11 +60,9 @@ public class HandleNewOrUpdatesSchedules {
         for (Document doc : collection.find()) {
 
             runs++;
-            System.out.println("START OF LOOP");
 
             String id = doc.getObjectId("_id").toString();
             String docAsString = doc.toJson();
-            System.out.println("here is the id " + id);
             if (!entrys.containsKey(id) || !entrys.get(id).equals(docAsString)) {
                 entrys.put(id, docAsString);
                 weekdaysandTimes = extractWeekdaysandTimes(String.valueOf(doc));
@@ -77,19 +75,15 @@ public class HandleNewOrUpdatesSchedules {
                             =weekdaysandTimes.get("Times").toString()
                             .replace("[", "").replace("]", "");
 
-                    System.out.println("Createed job for " + weekdays+ times);
                     scheduleHandler.createJob(weekdays, times, id);
                     weekdaysandTimes.clear();
 
                 } else {
-                    System.out.println("Skipping job creation for ID " + id + " due to missing time or day information.");
                 }
             }
 
-            System.out.println(runs);
         }
 
-        System.out.println("ENTRYS:" + entrys);
         scheduleHandler.getCurrentJobs();
     }
 }

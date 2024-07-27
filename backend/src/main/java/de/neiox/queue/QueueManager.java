@@ -12,7 +12,6 @@ public class QueueManager {
 
     public void createQueue(List<String> clipList) {
         clipQueue.addAll(clipList);
-        System.out.println("First element: " + clipQueue.element());
     }
 
     public void addClip(String clip) {
@@ -56,11 +55,9 @@ public class QueueManager {
             try {
                 aiService.generate_subtitle(clip);
                 VideoEditorHandler.convertClipToShortVid(clip);
-                System.out.println("Done wth queue element");
-                System.out.println("Done wth queue element");
+
 
             } catch (Exception e) {
-                System.out.println("Error processing clip: " + clip + " - " + e.getMessage());
 
             }
         }

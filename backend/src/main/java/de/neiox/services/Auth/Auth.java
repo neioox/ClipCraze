@@ -27,12 +27,10 @@ public class Auth {
                     .withIssuer("neiox")
                     .build()
                     .verify(token);
-            System.out.println("Token ist gültig");
             return true;
 
         } catch (JWTVerificationException exception) {
             // Ungültiges Signatur/Token
-            System.out.println("Token ist ungültig");
             return false;
         }
     }
@@ -48,7 +46,7 @@ public class Auth {
 
         } catch (JWTCreationException e){
             // Invalid Signing configuration / Couldn't convert Claims.
-            System.out.println(e);
+            throw new JWTCreationException("Error", e );
         }
     }
 

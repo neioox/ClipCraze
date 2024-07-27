@@ -97,6 +97,7 @@ const recieveclipList = async () => {
     const clipList = await response.json();
     clips.value = clipList;
     // console.log(clipList)
+
     localStorage.setItem("clips", clipList)
     await Promise.all(clipList.map(async (clipName) => {
       const subExist = await subExists(clipName);

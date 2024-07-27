@@ -7,6 +7,8 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
+
+
 const back2Home = async () => {
   try {
     await router.push({ name: 'Home' });

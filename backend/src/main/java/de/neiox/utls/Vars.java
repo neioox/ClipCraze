@@ -36,7 +36,7 @@ public class Vars {
 
     // Getter for DB Connection String
     public static String getDbConnectionString() {
-        return getEnvVar("DB_CONNECTION_STRING", "mongodb://ADMIN:Admin123@172.17.0.2:27017");
+        return getEnvVar("DB_CONNECTION_STRING", "mongodb://Admin:Admin123@localhost:27017");
     }
 
 

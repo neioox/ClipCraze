@@ -6,6 +6,7 @@
     <div v-for="(clip, index) in clips" :key="index" class="w-1/4 m-4"
       :class="{ 'border-4  border-purple-600 shadow-2xl rounded-md': isSelected(clip) }"
       @click="toggleSelectClip(clip)">
+
       <h2 class="text-xl, font-bold" v-text="clip"></h2>
       <div>
         <video class="w-500 h-300 rounded-lg" :src="'http://localhost:8080/api/getclips/' + clip" controls></video>
@@ -20,7 +21,8 @@
       <p v-else class="text-red-500">An error occurred while checking subtitles</p>
       <DeleteClip :data-name="clip"></DeleteClip>
       <DownloadSubs v-if="subtitlesExist[clip] === true" :data-name="clip"></DownloadSubs>
-    </div>
+      
+      </div>
   </div>
 </template>
 

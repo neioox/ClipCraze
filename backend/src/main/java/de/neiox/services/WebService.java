@@ -2,6 +2,7 @@ package de.neiox.services;
 
 import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
+import de.neiox.models.ClipItem;
 import de.neiox.models.Setting;
 import de.neiox.queue.QueueManager;
 import de.neiox.services.Auth.Auth;
@@ -162,21 +163,20 @@ public class WebService {
         });
 
 
-        app.get("/api/clips", ctx -> {
-            Path dir = Paths.get("Clips");
+app.get("/api/clips", ctx -> {
+    Path dir = Paths.get("Clips");
 
-
-            List<String> videos = Files.list(dir)
-                    .filter(path -> !path.getFileName().toString().contains("w_subs") ||
-                            !path.getFileName().toString().contains("final")||
-                            !path.getFileName().toString().contains("blurred")||
-                            !path.getFileName().toString().contains("cropped"))
-                    .map(Path::getFileName)
-                    .map(Path::toString)
-                    .collect(Collectors.toList());
-            ctx.json(videos);
-        });
-
+    List<String> videos = Files.list(dir)
+            .filter(path -> !path.getFileName().toString().contains("w_subs") ||
+                    !path.getFileName().toString().contains("final") ||
+                    !path.getFileName().toString().contains("blurred") ||
+                    !path.getFileName().toString().contains("cropped") ||
+                    !path.getFileName().toString().contains("finished"))
+            .map(Path::getFileName)
+            .map(Path::toString)
+            .collect(Collectors.toList());
+    ctx.json(videos);
+});
         app.get("/api/checksubtitle/{clipname}", ctx -> {
             String clipName = ctx.pathParam("clipname");
             Path subtitlePath = Paths.get("transcript/SrtFiles/" + clipName + ".srt"); // Make sure to add a slash before the clipName
@@ -200,9 +200,9 @@ public class WebService {
 
             Map<String, Boolean> response = new HashMap<>();
             if (Files.exists(subtitlePath)) {
-                response.put("Exists", true);
+                response.put("Exists", Boolean.valueOf(true));
             } else {
-                response.put("Exists", false);
+                response.put("Exists", Boolean.valueOf(false));
             }
             ctx.json(response);
         });
@@ -320,7 +320,7 @@ public class WebService {
             String Password = ctx.formParam("password");
 
             try{
-                Boolean result =  mongoDB.validateuser(Username, Password);
+                boolean result =  mongoDB.validateuser(Username, Password);
 
                 if (result){
                     Document userDoc = mongoDB.getUserByUserName(Username);
@@ -345,7 +345,7 @@ public class WebService {
             String token = ctx.formParam("token");
 
             try {
-                Boolean result = auth.checkToken(token);
+                boolean result = auth.checkToken(token);
 
                 if (result) {
                     ctx.result("{\"response\": \"Token ist gültig\"}");
@@ -420,7 +420,17 @@ public class WebService {
 
 
                 QueueManager queueManager = new QueueManager();
-                queueManager.createQueue(clips);
+
+                List<ClipItem> clipItems = new ArrayList<>();
+
+
+                for (String clip : clips) {
+                    ClipItem clipItem = new ClipItem(userid, clip);
+                    clipItems.add(clipItem);
+                }
+
+
+                queueManager.createQueue(clipItems);
                 queueManager.processQueue();
                 ctx.result("{\"response\":  Clips processed succesfully!}");
 

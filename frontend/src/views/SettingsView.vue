@@ -4,7 +4,7 @@
 
     <!-- Your other template code goes here -->
 
-    <div style="background-color: yellowgreen;">
+    <div>
       
 
       <h2 class="text-2xl font-bold">Original</h2>

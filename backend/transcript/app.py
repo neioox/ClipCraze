@@ -5,19 +5,16 @@ from flask_cors import CORS
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 from moviepy.video.tools.subtitles import SubtitlesClip
 from moviepy.video.fx.all import crop
-from moviepy.editor import *
 from skimage.filters import gaussian
 import stable_whisper
 from langchain.llms import Ollama
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler 
 import logging
-import threading
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-lock = threading.Lock()
 model = None
 llm = None
 
@@ -38,9 +35,6 @@ def load_models():
     print("Ollama model loaded")
     print("DONE!")
 
-    with lock:
-        lock.notify_all()
-
 def success_response(message):
     return jsonify({"success": True, "message": message})
 
@@ -52,8 +46,6 @@ def blur(image):
 
 @app.route("/crop4tiktok/<filename>/<format>", methods=["POST"])
 def crop4tiktok(filename, format):
-    with lock:
-        lock.wait()
 
     clips_path = "../Clips"
     input_file = os.path.join(clips_path, filename)
@@ -104,9 +96,6 @@ def convertclip2tt(filename):
         return jsonify({"success": False, "error": str(e)})
 
 def transcribe_audio(path, name):
-    with lock:
-        lock.wait()
-
     logger.info('Transcription started for file: %s', path)
     results = model.transcribe(audio=path)
 
@@ -122,11 +111,8 @@ def transcribe_audio(path, name):
 
 @app.route("/generateText/<topic>", methods=["POST"])
 def generateText(topic):
-    with lock:
-        lock.wait()
-
     prompt = """Given the following video topic, generate a catchy 
-    and short TikTok description  you can use hashtags and emojis: 
+    and short TikTok description you can use hashtags and emojis: 
     """ + topic
     response = llm(prompt)
     return jsonify({"success": True, "description": response})
@@ -156,6 +142,7 @@ logger = logging.getLogger(__name__)
 print("Starting the Python API...")
 
 if __name__ == "__main__":
-    threading.Thread(target=load_models).start()
+    load_models()  # Load models synchronously
     app.run(debug=False, port=5000, host='0.0.0.0')
     print("Python API is running")
+    print("test")

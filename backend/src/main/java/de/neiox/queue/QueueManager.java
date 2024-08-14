@@ -1,21 +1,23 @@
 package de.neiox.queue;
 
+import de.neiox.models.ClipItem;
 import de.neiox.services.AIService;
 import de.neiox.services.VideoEditorHandler;
-
+import de.neiox.services.WebhookService;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-public class QueueManager {
-    Queue<String> clipQueue = new LinkedList<>();
 
-    public void createQueue(List<String> clipList) {
+public class QueueManager {
+    Queue<ClipItem> clipQueue = new LinkedList<>();
+
+    public void createQueue(List<ClipItem> clipList) {
         clipQueue.addAll(clipList);
     }
 
-    public void addClip(String clip) {
-        clipQueue.offer(clip);
+    public void addClip(ClipItem clipItem) {
+        clipQueue.offer(clipItem);
     }
 
     public void displayAndRemoveFront() {
@@ -26,16 +28,16 @@ public class QueueManager {
         }
     }
 
-    public String getFirstQueuedClip(){ return clipQueue.peek();}
+    public ClipItem getFirstQueuedClip() {
+        return clipQueue.peek();
+    }
 
-
-
-        public void displayAllClips() {
+    public void displayAllClips() {
         if (clipQueue.isEmpty()) {
             System.out.println("Queue is empty.");
         } else {
-            for (String clip : clipQueue) {
-                System.out.println(clip);
+            for (ClipItem clipItem : clipQueue) {
+                System.out.println(clipItem);
             }
         }
     }
@@ -45,20 +47,19 @@ public class QueueManager {
         System.out.println("All elements removed.");
     }
 
-
-    public void processQueue(){
+    public void processQueue() {
         AIService aiService = new AIService();
+        WebhookService webhookService = new WebhookService();
 
         while (!clipQueue.isEmpty()) {
-            String clip = clipQueue.poll();  // Retrieves and removes the head of this queue
+            ClipItem clipItem = clipQueue.poll();  // Retrieves and removes the head of this queue
 
             try {
-                aiService.generate_subtitle(clip);
-                VideoEditorHandler.convertClipToShortVid(clip);
-
-
+                aiService.generate_subtitle(clipItem.getClip());
+                VideoEditorHandler.convertClipToShortVid(clipItem.getClip());
+                webhookService.sendFiletoWebhook(clipItem.getId(), clipItem.getClip());
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
     }

@@ -111,9 +111,9 @@ public class MongoDB {
         Document doc = new Document("Name", name)
                 .append("Streamer", streamer)
                 .append("duration", duration)
-                .append("ttl", ttl)
+                .append("ttl", Optional.of(ttl))
                 .append("Filename", filename)
-                .append("usecount", 0);
+                .append("usecount", Optional.of(0));
         collection.insertOne(doc);
     }
 
@@ -131,7 +131,7 @@ public class MongoDB {
 
             // Check that an unencrypted password matches one that has
             // previously been hashed+
-            Boolean test = BCrypt.checkpw(Password,hashedpassword);
+            Boolean test = (Boolean) BCrypt.checkpw(Password,hashedpassword);
 
 
             if (BCrypt.checkpw(Password,hashedpassword))

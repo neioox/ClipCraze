@@ -4,6 +4,7 @@ import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
 import de.neiox.models.ClipItem;
 import de.neiox.models.Setting;
+import de.neiox.models.User;
 import de.neiox.queue.QueueManager;
 import de.neiox.services.Auth.Auth;
 import de.neiox.utls.requestHandler;
@@ -116,7 +117,9 @@ public class WebService {
 
             try {
                 WebhookService webhookService = new WebhookService();
-                webhookService.sendFiletoWebhook(id, filePath);
+                User user =  UserService.getUserByID(id);
+
+                webhookService.sendFiletoWebhook(user, filePath);
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -167,12 +170,7 @@ app.get("/api/clips", ctx -> {
     Path dir = Paths.get("Clips");
 
     List<String> videos = Files.list(dir)
-            .filter(path -> !path.getFileName().toString().contains("w_subs") ||
-                    !path.getFileName().toString().contains("final") ||
-                    !path.getFileName().toString().contains("blurred") ||
-                    !path.getFileName().toString().contains("cropped") ||
-                    !path.getFileName().toString().contains("finished"))
-            .map(Path::getFileName)
+            .filter(path -> !path.getFileName().toString().contains("w_subs"))
             .map(Path::toString)
             .collect(Collectors.toList());
     ctx.json(videos);
@@ -313,6 +311,21 @@ app.get("/api/clips", ctx -> {
         });
 
 
+        app.delete("/api/deleteAllClips", ctx -> {
+            Path dir = Paths.get("Clips");
+            try (Stream<Path> paths = Files.list(dir)) {
+                paths.forEach(path -> {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                ctx.result("{\"response\": Deleted all clips successfully}");
+            } catch (IOException e) {
+                ctx.result("{\"response\": " + e.getMessage() + "}");
+            }
+        });
 
 
         app.post("/api/validate/login", ctx ->{
@@ -392,7 +405,12 @@ app.get("/api/clips", ctx -> {
 
             try{
                 System.out.println(Username);
-                String result = mongoDB.createUser(Username, Password, Group);
+                User user = new User(Username, Password, Group, "user");
+
+
+
+
+                String result = mongoDB.createUser(user);
                 switch (result){
                     case "inserted user!":
 

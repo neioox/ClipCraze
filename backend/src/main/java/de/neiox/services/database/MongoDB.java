@@ -7,6 +7,8 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import de.neiox.models.Setting;
+import de.neiox.models.User;
+import de.neiox.services.UserService;
 import de.neiox.utls.Vars;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -62,7 +64,31 @@ public class MongoDB {
                 createCollection("Streamers");
                 createCollection("Settings");
                 createCollection("Schedules");
+            }else {
+
+
+                System.out.println( "ALL USERS: " + getAllUsers());
+
+
+                List<Document> allUsers = getAllUsers();
+
+
+                for (Document userdoc : allUsers) {
+                    String username = userdoc.getString("Username");
+                    String password = userdoc.getString("Password");
+                    String role = userdoc.getString("Group");
+                    String id = userdoc.getObjectId("_id").toString();
+                    User user = new User(username, password,"TODO:IMPLEMENTEMAIL@mail.de" , role);
+                    user.setUserid(id);
+                    UserService.addUser(user);
+                }
+
+
+
+                System.out.println( "ALL USERS IN MY SERVICE: " + UserService.users);
             }
+
+
         } catch (Exception e){
             throw new Exception(e);
         }
@@ -87,18 +113,20 @@ public class MongoDB {
         return iterable.first() != null;
     }
 
-    public String  createUser(String Username, String Password, String Group){
+    public String  createUser(User user){
         MongoCollection<Document> collection = db.getCollection("Users");
 
-        if (!documentExists(db, "Users", "Username", Username)) {
+        if (!documentExists(db, "Users", "Username", user.getUsername())) {
 
 
-            String cryptedpassword = BCrypt.hashpw(Password, BCrypt.gensalt());
+            String cryptedpassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
 
-            Document doc = new Document("Username", Username)
+            Document doc = new Document("Username", user.getUsername())
                     .append("Password",cryptedpassword)
-                    .append("Group", Group);
+                    .append("Group", user.getRole());
             collection.insertOne(doc);
+
+            UserService.addUser(user);
             return "inserted user!";
         }else {
 
@@ -217,6 +245,10 @@ public class MongoDB {
             MongoCollection<Document> collection = db.getCollection("Settings");
             Document document = collection.find(Filters.eq("assigned", assignedUser)).first();
 
+
+
+
+
             if (document == null) {
                 Document newDoc = new Document("webhook", encryptWebhook(webhook))
                         .append("assigned", assignedUser);
@@ -226,6 +258,16 @@ public class MongoDB {
                         Updates.combine(Updates.set("webhook", encryptWebhook(webhook))));
 
             }
+
+
+            Setting setting = new Setting(UUID.randomUUID().toString(), webhook, assignedUser);
+
+            User user =  UserService.getUserByID(assignedUser);
+              if (user != null) {
+                  user.setSetting(setting);
+              }
+
+
         } catch (Exception e) {
         throw  new Exception(e);
         }

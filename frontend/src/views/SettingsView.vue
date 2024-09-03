@@ -2,8 +2,6 @@
   <div>
     <h1 class="font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent p-6 text-7xl">Settings</h1>
 
-    <!-- Your other template code goes here -->
-
     <div>
       
 

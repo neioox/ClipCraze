@@ -1,6 +1,9 @@
 <template>
 
   <button v-if="selectedClips.length > 0" @click="addClipstoQueue">Add clips to queue</button>
+  <button class="accent-red-600" @click="deleteAllClips">delete ALL clips</button>
+
+
 
   <div class="flex flex-wrap pl-10">
     <div v-for="(clip, index) in clips" :key="index" class="w-1/4 m-4"
@@ -57,30 +60,40 @@ function toggleSelectClip(clip) {
 
 const addClipstoQueue = async () => {
   if (selectedClips.value.length > 0) {
-
     const formData = new FormData();
-   
     selectedClips.value.forEach(clip => {
       formData.append('clip', clip);  
     });
-   
-  
-
     const response = await fetch('http://localhost:8080/api/createQueue/', {
       method: 'POST',
       body: formData
     });
-
     if (!response.ok) {
       throw new Error('Invalid');
     }
-
     const data = await response.json();
     console.log(data.response);
-
   }
 
 }
+
+
+
+const deleteAllClips = async () => {
+
+    const response = await fetch('http://localhost:8080/api/deleteAllClips/', {
+      method: 'DELETE'
+    });
+    if (!response.ok) {
+      throw new Error('Invalid');
+    }
+    const data = await response.json();
+    console.log(data.response);
+
+
+}
+
+
 
 const navigateToSettings = async (Clip) => {
   try {

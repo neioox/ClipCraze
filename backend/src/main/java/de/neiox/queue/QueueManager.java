@@ -1,7 +1,9 @@
 package de.neiox.queue;
 
 import de.neiox.models.ClipItem;
+import de.neiox.models.User;
 import de.neiox.services.AIService;
+import de.neiox.services.UserService;
 import de.neiox.services.VideoEditorHandler;
 import de.neiox.services.WebhookService;
 
@@ -57,7 +59,14 @@ public class QueueManager {
             try {
                 aiService.generate_subtitle(clipItem.getClip());
                 VideoEditorHandler.convertClipToShortVid(clipItem.getClip());
-                webhookService.sendFiletoWebhook(clipItem.getId(), clipItem.getClip());
+
+
+                User user = UserService.getUserByID(clipItem.getId());
+
+                if(user != null){
+
+                    webhookService.sendFiletoWebhook(user, clipItem.getClip());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

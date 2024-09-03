@@ -1,5 +1,6 @@
 package de.neiox.services;
 
+import de.neiox.models.User;
 import de.neiox.utls.DiscordWebhook;
 
 import java.io.File;
@@ -10,20 +11,25 @@ import static de.neiox.Main.mongoDB;
 public class WebhookService {
 
 
+
+
+
+
+
     getClips getclips = new getClips();
 
-    public void sendFiletoWebhook(String id, String file) throws IOException {
+    public void sendFiletoWebhook(User user, String file) throws IOException {
 
         try {
 
 
-            String url = mongoDB.getWebhookFromUser(id);
+            String url = user.getSetting().getWebhook();
            if (url != null) {
                if (!url.isEmpty()) {
 
 
                    DiscordWebhook webhook = new DiscordWebhook(url);
-                   File clip = getclips.getSpecificClipFromUser(id, file);
+                   File clip = getclips.getSpecificClipFromUser(user.getUserid(), file);
 
 
                    webhook.setUsername("TIKTOK UPLOADER");
@@ -37,5 +43,6 @@ public class WebhookService {
         }
 
     }
+
 
 }

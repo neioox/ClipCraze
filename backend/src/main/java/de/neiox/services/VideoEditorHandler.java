@@ -1,6 +1,7 @@
 package de.neiox.services;
 
 import de.neiox.manager.FileHandler;
+import de.neiox.models.User;
 import de.neiox.wrapper.FfmpegWrapper;
 
 
@@ -43,14 +44,14 @@ public class VideoEditorHandler {
 
             String userid = filename.split("_")[2];
 
-
+            User user = UserService.getUserByID(userid);
             FfmpegWrapper.addSubtitleWithFont(inputFile, SrtFile, "Komika Axis", 24, SuboutputFile);
             FfmpegWrapper.applyBoxBlur(inputFile, BlurredVideo, 13);
             FfmpegWrapper.cropVideoForTikTok(BlurredVideo, CroppedVideo);
             FfmpegWrapper.addCenteredResizedOverlay(CroppedVideo, SuboutputFile, finalClip);
 
 
-            webhookService.sendFiletoWebhook(userid, filename);
+            webhookService.sendFiletoWebhook(user, filename);
 
 
 

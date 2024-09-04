@@ -134,6 +134,42 @@ public class MongoDB {
         }
     }
 
+
+    public String updateUser(User user) {
+    MongoCollection<Document> collection = db.getCollection("Users");
+
+    // Check if the user exists by their username
+    if (documentExists(db, "Users", "Username", user.getUsername())) {
+        // Create an update document with the new values
+        Document updatedDocument = new Document();
+
+        // If the password is provided, encrypt and update it
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            String cryptedpassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+            updatedDocument.append("Password", cryptedpassword);
+        }
+
+        // If the role/group is provided, update it
+        if (user.getRole() != null && !user.getRole().isEmpty()) {
+            updatedDocument.append("Group", user.getRole());
+        }
+
+        // Create an update operation for the existing user
+        Document updateOperation = new Document("$set", updatedDocument);
+
+        // Perform the update
+        collection.updateOne(new Document("Username", user.getUsername()), updateOperation);
+
+        // Optionally update the in-memory user cache or list
+        UserService.updateUser(user);
+
+        return "User updated successfully!";
+    } else {
+        return "User does not exist";
+    }
+}
+
+
     public void createClip(String name, int ttl, String streamer, String duration, String filename){
         MongoCollection<Document> collection = db.getCollection("Clips");
         Document doc = new Document("Name", name)

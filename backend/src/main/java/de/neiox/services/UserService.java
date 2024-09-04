@@ -18,6 +18,8 @@ public class UserService {
         users.remove(user);
     }
 
+
+
     public static User getUserByID(String id) {
         for (User user : users) {
             if (user.getUserid().equals(id)) {
@@ -28,7 +30,10 @@ public class UserService {
         return null;
     }
 
+    public static void updateUser(User user){
 
+        mongoDB.updateUser(user)
+    }
 
 
 }

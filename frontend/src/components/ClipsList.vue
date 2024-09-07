@@ -1,7 +1,7 @@
 <template>
 
   <button v-if="selectedClips.length > 0" @click="addClipstoQueue">Add clips to queue</button>
-  <button class="accent-red-600" @click="deleteAllClips">delete ALL clips</button>
+  <button class="bg-red-700" @click="deleteAllClips">delete ALL clips</button>
 
 
 
@@ -110,11 +110,20 @@ const recieveclipList = async () => {
   try {
     const response = await fetch("http://localhost:8080/api/clips");
     const clipList = await response.json();
-    clips.value = clipList;
+
+
+    const regex = /^([^_]*_){3}[^_]*$/
+
+    // Filter the clip list to only include clips that match the regex
+    const filteredClipList = clipList.filter(clipName => regex.test(clipName));
+
+
+
+    clips.value = filteredClipList
     // console.log(clipList)
 
-    localStorage.setItem("clips", clipList)
-    await Promise.all(clipList.map(async (clipName) => {
+    localStorage.setItem("clips", filteredClipList)
+    await Promise.all(filteredClipList.map(async (clipName) => {
       const subExist = await subExists(clipName);
       subtitlesExist.value[clipName] = subExist;
     }));

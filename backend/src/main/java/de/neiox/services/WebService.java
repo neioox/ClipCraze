@@ -85,7 +85,7 @@ public class WebService {
 
         app.post("/api/convert4tiktok/v2/{filename}", ctx ->{
             String filename = ctx.pathParam("filename");
-            
+
             String result = VideoEditorHandler.convertClipToShortVid(filename);
 
             ctx.json(result);
@@ -166,15 +166,17 @@ public class WebService {
         });
 
 
-app.get("/api/clips", ctx -> {
-    Path dir = Paths.get("Clips");
+        app.get("/api/clips", ctx -> {
+            Path dir = Paths.get("Clips");
 
-    List<String> videos = Files.list(dir)
-            .filter(path -> !path.getFileName().toString().contains("w_subs"))
-            .map(Path::toString)
-            .collect(Collectors.toList());
-    ctx.json(videos);
-});
+            List<String> videos = Files.list(dir)
+
+                    .filter(path -> !path.getFileName().toString().contains("w_subs") )
+                    .map(path -> path.getFileName().toString())
+
+                    .collect(Collectors.toList());
+            ctx.json(videos);
+        });
         app.get("/api/checksubtitle/{clipname}", ctx -> {
             String clipName = ctx.pathParam("clipname");
             Path subtitlePath = Paths.get("transcript/SrtFiles/" + clipName + ".srt"); // Make sure to add a slash before the clipName

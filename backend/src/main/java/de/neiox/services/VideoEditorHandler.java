@@ -43,15 +43,20 @@ public class VideoEditorHandler {
 
 
             String userid = filename.split("_")[2];
+            System.out.println("Userid: " + userid);
+
 
             User user = UserService.getUserByID(userid);
-            FfmpegWrapper.addSubtitleWithFont(inputFile, SrtFile, "Komika Axis", 24, SuboutputFile);
+            FfmpegWrapper.addSubtitleWithFont(inputFile, SrtFile, "Komika Axis", 40, SuboutputFile);
             FfmpegWrapper.applyBoxBlur(inputFile, BlurredVideo, 13);
             FfmpegWrapper.cropVideoForTikTok(BlurredVideo, CroppedVideo);
             FfmpegWrapper.addCenteredResizedOverlay(CroppedVideo, SuboutputFile, finalClip);
 
 
-            webhookService.sendFiletoWebhook(user, filename);
+            if(user != null){
+                webhookService.sendFiletoWebhook(user, filename);
+            }
+
 
 
 

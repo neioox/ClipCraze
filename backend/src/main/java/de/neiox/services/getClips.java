@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,9 +47,9 @@ public class getClips implements Runnable{
 
 
 
-    public void requestClips(String id) {
+    public void requestClips(String id) throws InterruptedException {
 
-      List<String> streamers =   mongoDB.getStreamersNameFromUser(id);
+        List<String> streamers =   mongoDB.getStreamersNameFromUser(id);
 
 
         for (String element : streamers) {
@@ -82,13 +83,14 @@ public class getClips implements Runnable{
 
                         //download clips as thread
                         executorService.submit(() -> downloadClip(clipurl, finalI, id));
+                        TimeUnit.SECONDS.sleep(5);
                     }
 
                     executorService.shutdown();
                 }
             }
         }
-     }
+    }
 
 
     public String getRandomClipFromUser(String id) throws IOException {
@@ -101,22 +103,22 @@ public class getClips implements Runnable{
         return clips.get(randomIndex);
     }
 
-     public List<String> getAllClipsFromUser(String id) throws IOException {
-         Path dir = Paths.get("Clips");
-         List<String> Clips = Files.list(dir)
-             .filter(path -> !path.getFileName().toString().contains("w_subs") ||
-                     path.getFileName().toString().contains(id) ||
-                     !path.getFileName().toString().contains("final")||
-                     !path.getFileName().toString().contains("blurred")||
-                     !path.getFileName().toString().contains("cropped")
-             )
+    public List<String> getAllClipsFromUser(String id) throws IOException {
+        Path dir = Paths.get("Clips");
+        List<String> Clips = Files.list(dir)
+                .filter(path -> !path.getFileName().toString().contains("w_subs") ||
+                        path.getFileName().toString().contains(id) ||
+                        !path.getFileName().toString().contains("final")||
+                        !path.getFileName().toString().contains("blurred")||
+                        !path.getFileName().toString().contains("cropped")
+                )
 
 
-                 .map(Path::getFileName)
-                 .map(Path::toString)
-                 .collect(Collectors.toList());
-         return Clips;
-     }
+                .map(Path::getFileName)
+                .map(Path::toString)
+                .collect(Collectors.toList());
+        return Clips;
+    }
 
     public List<String> getFinishedClipsFromUser(String id) throws IOException {
         Path dir = Paths.get("Clips");
@@ -188,6 +190,8 @@ public class getClips implements Runnable{
             connection.disconnect();
 
             return  fileName;
+
+
         } catch (IOException e) {
 
             throw new IOException();
@@ -201,5 +205,4 @@ public class getClips implements Runnable{
 
     }
 }
-
 

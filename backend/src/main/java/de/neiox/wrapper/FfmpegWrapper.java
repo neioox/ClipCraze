@@ -21,6 +21,7 @@ public class FfmpegWrapper {
                     "ffmpeg",
                     "-f", "lavfi",
                     "-i", "color=size=320x240:duration=5:rate=25",
+                    "-b:v", "8000k",
                     "-vf", String.format("drawtext=fontfile=%s:text='Hello World':fontcolor=white:fontsize=30:x=(w-text_w)/2:y=(h-text_h)/2", fontPath),
                     "-t", "5",
                     "-y", "output.mp4"
@@ -59,6 +60,7 @@ public class FfmpegWrapper {
             String[] command = {
                     "ffmpeg",
                     "-i", videoPath,
+                    "-b:v", "8000k",
                     "-vf", String.format("subtitles='%s:force_style=FontName=%s,FontSize=%d'", subtitlePath, fontName, fontSize),
                     "-c:a", "copy",
                     "-y", outputVideoPath
@@ -139,8 +141,9 @@ public class FfmpegWrapper {
     public static void applyBoxBlur(String inputFile, String outputFile , int blurAmount) {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "ffmpeg", "-i", inputFile, "-vf", "boxblur="+blurAmount, "-c:a", "copy", outputFile
+                    "ffmpeg", "-i", inputFile, "-vf", "boxblur=" + blurAmount, "-b:v", "8000k", "-c:a", "copy", outputFile
             );
+
             processBuilder.redirectErrorStream(true);
             System.out.println("Applying box blur...");
             applyOnFile(processBuilder);
@@ -154,7 +157,7 @@ public class FfmpegWrapper {
         try {
             String cropFilter = String.format("crop=%d:%d:%d:%d", width, height, x, y);
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "ffmpeg", "-i", inputFile, "-vf", cropFilter, outputFile
+                    "ffmpeg", "-i", inputFile, "-vf", cropFilter, "-b:v", "8000k", outputFile
             );
             processBuilder.redirectErrorStream(true);
             System.out.println("Cropping video...");
@@ -174,17 +177,15 @@ public class FfmpegWrapper {
                 throw new IOException("Font file does not exist or is not a file: " + font.fontPath);
             }
 
-            // Escape spaces in font file path
-
             // Prepare the subtitles filter with the escaped font path
             String subtitles = String.format(
-                    "subtitles=%s:force_style='FontFile=%s;FontSize=%d;PrimaryColour=&H%s;Alignment=2'",
-                    srtFile, fontFile, font.size, font.color
+                    "subtitles='%s':force_style='FontName=%s,FontSize=%d,PrimaryColour=&H%s,Alignment=2'",
+                    srtFile, fontFile.getAbsolutePath(), font.size, font.color
             );
             System.out.println("FFmpeg subtitles option: " + subtitles);
 
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "ffmpeg", "-i", inputFile, "-vf", subtitles, "-codec:a", "copy", outputFile
+                    "ffmpeg", "-i", inputFile, "-vf", subtitles, "-b:v", "8000k", "-c:a", "copy", outputFile
             );
             processBuilder.redirectErrorStream(true);
             System.out.println("Adding subtitles...");
@@ -198,9 +199,9 @@ public class FfmpegWrapper {
 
     public static void addCenteredResizedOverlay(String backgroundVideo, String overlayVideo, String outputFile) {
         try {
-            String filter = "[1:v]scale=iw*0.35:ih*0.35[ovrl]; [0:v][ovrl]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2";
+            String filter = "[1:v]scale=iw*0.35:ih*0.35[ovrl];[0:v][ovrl]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2";
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "ffmpeg", "-i", backgroundVideo, "-i", overlayVideo, "-filter_complex", filter, "-codec:a", "copy", outputFile
+                    "ffmpeg", "-i", backgroundVideo, "-i", overlayVideo, "-filter_complex", filter, "-b:v", "8000k", "-c:a", "copy", outputFile
             );
             processBuilder.redirectErrorStream(true);
             System.out.println("Applying overlay...");
@@ -211,7 +212,14 @@ public class FfmpegWrapper {
         }
     }
 
+
     public static int[] getVideoDimensions(String inputFile) throws IOException, InterruptedException {
+
+        System.out.println(inputFile);
+
+
+
+
         ProcessBuilder probeProcessBuilder = new ProcessBuilder(
                 "ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=s=x:p=0", inputFile
         );
@@ -248,7 +256,7 @@ public class FfmpegWrapper {
 
             String cropFilter = String.format("crop=%d:%d:%d:%d", outputWidth, outputHeight, x, y);
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "ffmpeg", "-i", inputFile, "-vf", cropFilter, outputFile
+                    "ffmpeg", "-i", inputFile, "-vf", cropFilter, "-b:v", "8000k", outputFile
             );
             processBuilder.redirectErrorStream(true);
             System.out.println("Cropping video for TikTok...");
@@ -258,4 +266,5 @@ public class FfmpegWrapper {
             e.printStackTrace();
         }
     }
+
 }

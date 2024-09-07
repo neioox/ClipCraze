@@ -4,6 +4,8 @@ import de.neiox.models.User;
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.neiox.Main.mongoDB;
+
 public class UserService {
 
 
@@ -32,7 +34,7 @@ public class UserService {
 
     public static void updateUser(User user){
 
-        mongoDB.updateUser(user)
+        mongoDB.updateUser(user);
     }
 
 

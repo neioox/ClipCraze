@@ -3,21 +3,22 @@
     <h1 class="font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent p-6 text-7xl">Settings</h1>
 
     <div>
-      
 
       <h2 class="text-2xl font-bold">Original</h2>
       <div class="w-full flex justify-center">
         <video class="mx-auto rounded-lg" width="500" height="300" :src="'http://localhost:8080/api/getclips/' + clip" controls></video>
       </div>
 
-      <div>
-        <h2 class="text-xl font-bold">With subtitles</h2>
-        <video v-if="checkSubtitle" width="500" height="300" :src="'http://localhost:8080/api/getclips/' + clipWithSubs" controls></video>
-        <p v-else>Does not exist yet</p>
+      <div class="w-full flex flex-col items-center">
+        <h2 class="text-xl font-bold w-full flex justify-center">With subtitles</h2>
+        <div class="w-full flex justify-center">
+          <video width="500" height="300" :src="'http://localhost:8080/api/getclips/' + clipWithSubs" controls></video>
+        </div>
 
-        <h2 class="text-xl font-bold">Cropped for Short Videos</h2>
-        <video v-if="checkSubtitle" width="500" height="300" :src="'http://localhost:8080/api/getclips/' + shortClip" controls></video>
-        <p v-else>Does not exist yet</p>
+        <h2 class="text-xl font-bold w-full flex justify-center mt-4">Cropped for Short Videos</h2>
+        <div class="w-full flex justify-center">
+          <video width="500" height="300" :src="'http://localhost:8080/api/getclips/' + shortClip" controls></video>
+        </div>
       </div>
 
       <div>
@@ -66,6 +67,5 @@ const back2Home = async () => {
     console.error(error);
   }
 };
-
 
 </script>

@@ -1,13 +1,10 @@
 package de.neiox.services;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.neiox.utls.Vars;
-import de.neiox.utls.requestHandler;
+import de.neiox.utls.RequestHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import scala.util.parsing.combinator.testing.Str;
 
 import static de.neiox.Main.mongoDB;
 
@@ -22,7 +19,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,7 +43,7 @@ public class getClips implements Runnable{
 
 
 
-    public void requestClips(String id) throws InterruptedException {
+    public void requestClips(String id) throws InterruptedException, IOException {
 
         List<String> streamers =   mongoDB.getStreamersNameFromUser(id);
 
@@ -57,7 +53,7 @@ public class getClips implements Runnable{
             String username = element.toLowerCase(Locale.ROOT).replace("\"", "");
             String url = "https://api.twitch.tv/helix/users?login=" + username;
 
-            String userinfo = requestHandler.getRequest(url);
+            String userinfo = RequestHandler.getRequest(url);
             JSONObject jsonResponse = new JSONObject(userinfo.toString());
 
             JSONArray dataArray = jsonResponse.getJSONArray("data");
@@ -67,8 +63,9 @@ public class getClips implements Runnable{
                 String user_id = dataObject.getString("id");
 
                 //get top clips of last 24h
-                String topClips = requestHandler.getRequest("https://api.twitch.tv/helix/clips?broadcaster_id=" + user_id + "&first=5&started_at="+formattedLastWeek+"00:00:00.00Z&first=5");
+                String topClips = RequestHandler.getRequest("https://api.twitch.tv/helix/clips?broadcaster_id=" + user_id + "&first=5&started_at="+formattedLastWeek+"00:00:00.00Z&first=5");
 
+                System.out.println(topClips);
 
                 if (topClips != null) {
                     JSONObject topclipsObject = new JSONObject(topClips);
@@ -78,12 +75,33 @@ public class getClips implements Runnable{
 
                     for (int i = 0; i < topClipsArray.length(); i++) {
                         JSONObject clipdataObject = topClipsArray.getJSONObject(i);
-                        String clipurl = clipdataObject.getString("url");
+
+
+
+
+                       // String thumbnailUrl = clipdataObject.getString("thumbnail_url");
+                       // String clipUrl = thumbnailUrl.replace("-preview-480x272.jpg", ".mp4");
+                        String clipChannel = clipdataObject.getString("broadcaster_name");
+                        String clipID = clipdataObject.getString("id");
+
+
+                        String clipUrl = TwitchService.buildDownloadURL(clipID, false);
+
+//                        if(!clipUrl.contains("clips-media-assets2")){
+//
+//
+//
+//
+//                            clipUrl = TwitchDownloadURLBuilder.buildDownloadURL(clipID, false);
+//
+//                        }
+
                         int finalI = i;
 
-                        //download clips as thread
-                        executorService.submit(() -> downloadClip(clipurl, finalI, id));
-                        TimeUnit.SECONDS.sleep(5);
+
+
+                        executorService.submit(() -> downloadClip(clipUrl, finalI, id, clipChannel));
+
                     }
 
                     executorService.shutdown();
@@ -149,54 +167,93 @@ public class getClips implements Runnable{
         }
     }
 
-    public static String downloadClip(String clipUrl, int id, String userID) throws IOException {
+    public static String downloadClip(String clipUrl, int id, String userID, String clipTitle) throws IOException {
+        HttpURLConnection connection = null;
+        InputStream inputStream = null;
+        FileOutputStream outputStream = null;
+
+        System.out.println("Downloading clip: " + clipUrl);
 
         try {
-            String getAsset = requestHandler.getRequest("https://api.efuse.gg/api/sidekick/twitch-clip?url="+ clipUrl);
-            JSONObject jsonResponse = new JSONObject(getAsset);
-            // Create a connection to the clip URL
-            String mp4URL = jsonResponse.getString("mp4_url");
-            String clipTitle = jsonResponse.getString("broadcaster_name");
-
-
-            URL url = new URL(mp4URL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            URL url = new URL(clipUrl);
+            connection = (HttpURLConnection) url.openConnection();
 
             // Set the Client-ID header for authentication
             connection.setRequestProperty("Client-ID", Vars.getTwitchClientID());
+            connection.connect();
 
-            // Get the input stream for the clip
-            InputStream inputStream = connection.getInputStream();
-            // Determine the file name from the URL (you can customize this)
-            String fileName = clipTitle +"_"+  id +"_" + formattedDateTime + "_" +userID+   ".mp4";
-
-            File targetDir=new File("Clips");
-
-            File targetFile=new File(targetDir, fileName);
-
-            // Create a file output stream to save the clip
-            FileOutputStream outputStream = new FileOutputStream(targetFile);
-
-            // Read and save the clip content
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
+            // Check the HTTP response code before proceeding
+            int responseCode = connection.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                throw new IOException("Failed to download file: HTTP response code " + responseCode);
             }
 
-            // Close the streams and the connection
-            inputStream.close();
-            outputStream.close();
-            connection.disconnect();
+            // Check the content type to ensure it's an MP4 or octet-stream file
+            String contentType = connection.getContentType();
+//            if (!contentType.equals("video/mp4") && !contentType.equals("application/octet-stream")) {
+//                throw new IOException("Unexpected content type: " + contentType);
+//            }
 
-            return  fileName;
+            // Get the input stream for the clip
+            inputStream = connection.getInputStream();
 
+            // Determine the file name from the URL (you can customize this)
+            String formattedDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            String fileName = clipTitle + "_" + id + "_" + formattedDateTime + "_" + userID + ".mp4";
+
+            // Ensure the target directory exists
+            File targetDir = new File("Clips");
+            if (!targetDir.exists()) {
+                targetDir.mkdirs();
+            }
+
+            File targetFile = new File(targetDir, fileName);
+
+            // Create a file output stream to save the clip
+            outputStream = new FileOutputStream(targetFile);
+
+            // Read and save the clip content
+            byte[] buffer = new byte[8192]; // Larger buffer size for performance
+            int bytesRead;
+            long totalBytesRead = 0;
+            long contentLength = connection.getContentLengthLong(); // Get the expected content length
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+                totalBytesRead += bytesRead;
+            }
+
+            // Flush and close the output stream to ensure all data is written
+            outputStream.flush();
+
+            // Check if the downloaded file size matches the expected content length
+            if (totalBytesRead != contentLength) {
+                throw new IOException("Downloaded file size does not match the expected content length. File might be incomplete.");
+            }
+
+            // Return the file name if successful
+            return fileName;
 
         } catch (IOException e) {
+            throw new IOException("Error downloading clip: " + e.getMessage(), e);
 
-            throw new IOException();
+        } finally {
+            // Close streams and disconnect connection in the finally block
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (outputStream != null) {
+                outputStream.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
+
+
+
+
 
 
 

@@ -22,6 +22,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
 
+
         Path tempFile = FileHandler.copyResourceToTempFile("/LEMONMILK-Bold.otf");
         FontHandler.installFonts(tempFile.toFile());
         String modifiedString = tempFile.toString().replaceAll("\\\\", "/");

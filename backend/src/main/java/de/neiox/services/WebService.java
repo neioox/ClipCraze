@@ -4,10 +4,11 @@ import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
 import de.neiox.models.ClipItem;
 import de.neiox.models.Setting;
+import de.neiox.models.TwitchClip;
 import de.neiox.models.User;
 import de.neiox.queue.QueueManager;
 import de.neiox.services.Auth.Auth;
-import de.neiox.utls.requestHandler;
+import de.neiox.utls.RequestHandler;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import org.bson.Document;
@@ -385,7 +386,19 @@ public class WebService {
 
             try {
 
-                String filename =  getClips.downloadClip(twitchClipUrl, id , userid);
+                //TODO FIX THIS
+
+
+                String clipId = TwitchService.parseClipId(twitchClipUrl);
+
+
+                System.out.println(clipId);
+                 TwitchClip clip = TwitchService.getTwitchClipByID(clipId);
+
+
+                System.out.println(clip.getBroadcaster_name());
+
+                String filename = getClips.downloadClip(clip.getDonwlaodurl(), id , userid, clip.getBroadcaster_name());
 
                 if (filename != "") {
                     ctx.result("{\"response\": \"downloaded sucessfull\"}");
@@ -652,7 +665,7 @@ public class WebService {
 
                 // Fetch user info from Twitch API
                 for (String streamer : streamerNames) {
-                    String response = requestHandler.getRequest("https://api.twitch.tv/helix/users?login=" + streamer);
+                    String response = RequestHandler.getRequest("https://api.twitch.tv/helix/users?login=" + streamer);
                     JSONObject streamerInfo = new JSONObject(response);
                     userInfo.add(streamerInfo);
                 }

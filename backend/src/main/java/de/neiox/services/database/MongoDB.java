@@ -6,6 +6,7 @@ import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
+import de.neiox.enums.Settings;
 import de.neiox.models.Setting;
 import de.neiox.models.User;
 import de.neiox.services.UserService;
@@ -276,7 +277,7 @@ public class MongoDB {
 
 
 
-    public void createSettings(String webhook, String assignedUser) throws Exception {
+    public void createSettings(String webhook, String assignedUser , int dayPeriodeOfClip) throws Exception {
         try {
             MongoCollection<Document> collection = db.getCollection("Settings");
             Document document = collection.find(Filters.eq("assigned", assignedUser)).first();
@@ -286,8 +287,13 @@ public class MongoDB {
 
 
             if (document == null) {
-                Document newDoc = new Document("webhook", encryptWebhook(webhook))
-                        .append("assigned", assignedUser);
+
+
+
+
+                Document newDoc = new Document(Settings.WEBHOOK.getSetting(), encryptWebhook(webhook))
+                        .append(Settings.ASSIGNED.getSetting(), assignedUser)
+                        .append(Settings.DAYPERIODEOFTHECLIP.getSetting(), dayPeriodeOfClip);
                 collection.insertOne(newDoc);
             } else {
                 collection.updateOne(Filters.eq("assigned", assignedUser),
@@ -296,7 +302,11 @@ public class MongoDB {
             }
 
 
-            Setting setting = new Setting(UUID.randomUUID().toString(), webhook, assignedUser);
+            Setting setting = new Setting(UUID.randomUUID().toString());
+            setting.setSetting(Settings.WEBHOOK, webhook);
+            setting.setSetting(Settings.ASSIGNED, assignedUser);
+            setting.setSetting(Settings.DAYPERIODEOFTHECLIP, String.valueOf(dayPeriodeOfClip));
+
 
             User user =  UserService.getUserByID(assignedUser);
               if (user != null) {
@@ -320,7 +330,10 @@ public class MongoDB {
         String cryptedWebhook = doc.getString("webhook");
         String docid = doc.getString("id");
         String decodedUrl = new String(Base64.getDecoder().decode(cryptedWebhook));
-        Setting setting = new Setting(docid, decodedUrl, id);
+        Setting setting = new Setting(docid);
+        setting.setSetting(Settings.WEBHOOK, decodedUrl);
+        setting.setSetting(Settings.ASSIGNED, id);
+        setting.setSetting(Settings.DAYPERIODEOFTHECLIP, doc.getString("dayPeriodOfTheClip"));
 
         return setting;
     }

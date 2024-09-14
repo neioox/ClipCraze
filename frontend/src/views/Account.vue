@@ -10,9 +10,19 @@
       <div>
         <p>Discord WEBHOOK link</p>
         <input v-model="url" type="text" placeholder="Enter Discord WEBHOOK url here" />
-        <button @click="setWebhook">Set Webhook</button>
+        <button @click="setWebhook">set</button>
       </div>
-      
+
+
+      <div>
+
+        <p>Get clips from the last ___ days</p>
+        <input v-model="dayPeriod" type="number" placeholder="Enter Day periode of the clips" />
+
+        <button @click="setPeriodeOfClips">set</button>
+      </div>
+
+
       <button @click="logout" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline">
         Logout
       </button>
@@ -43,6 +53,7 @@ export default {
     const userLoggedin = ref(false);
     const userName = ref("");
     const url = ref("");
+    const dayPeriod = ref("");
 
     const checkUserToken = () => {
       const userToken = localStorage.getItem("token");
@@ -52,7 +63,7 @@ export default {
       }
     };
 
-    const fetchWebhook = async () => {
+    const fetchSettings = async () => {
       try {
         const userId = localStorage.getItem('userid');
         const response = await fetch(`http://localhost:8080/api/getSettings/${userId}`);
@@ -60,32 +71,70 @@ export default {
         
         const data = await response.json();
         url.value = data.webhook;
+        dayPeriod.value = data.dayPeriodOfTheClip;
+
         console.log("URL: " + url.value);
       } catch (error) {
         console.error("Error fetching settings:", error);
       }
     };
 
+
+
+  const addSettings = async (form) => {
+
+
+
+    try {
+
+
+
+    const response = await fetch("http://localhost:8080/api/addSettings", {
+      method: 'POST',
+      body: form,
+    });
+
+    if (!response.ok) throw new Error('Failed to set webhook');
+
+    const data = await response.json();
+    console.log('add Settings response:', data);
+  } catch (error) {
+      console.error("Error :", error);
+    }
+
+  }
+
     const setWebhook = async () => {
-      try {
+
+
         const userId = localStorage.getItem('userid');
         const formData = new FormData();
         formData.append('id', userId);
         formData.append('webhook', url.value);
 
-        const response = await fetch("http://localhost:8080/api/addSettings", {
-          method: 'POST',
-          body: formData,
-        });
+        addSettings(formData);
 
-        if (!response.ok) throw new Error('Failed to set webhook');
-
-        const data = await response.json();
-        console.log('Set webhook response:', data);
-      } catch (error) {
-        console.error("Error setting webhook:", error);
-      }
     };
+
+    const setPeriodeOfClips = async () => {
+
+
+
+
+
+        const userId = localStorage.getItem('userid');
+        const formData = new FormData();
+        formData.append('id', userId);
+        formData.append('dayPeriodeOfClip', dayPeriod.value);
+
+        addSettings(formData);
+
+
+
+
+
+    }
+
 
     const logout = () => {
       localStorage.removeItem("token");
@@ -97,7 +146,7 @@ export default {
     onMounted(async () => {
       checkUserToken();
       if (userLoggedin.value) {
-        await fetchWebhook();
+        await fetchSettings();
       }
     });
 

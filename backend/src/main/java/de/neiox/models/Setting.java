@@ -1,20 +1,22 @@
 package de.neiox.models;
 
 import kong.unirest.json.JSONObject;
+import de.neiox.enums.Settings;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public class Setting {
     private String id;
-    private String webhook;
-    private String assigned;
+    private Map<Settings, String> settings;
 
     // Constructor
-    public Setting(String id, String webhook, String assigned) {
+    public Setting(String id) {
         this.id = id;
-        this.webhook = webhook;
-        this.assigned = assigned;
+        this.settings = new EnumMap<>(Settings.class);
     }
 
-    // Getters and setters
+    // Getters and setters for id
     public String getId() {
         return id;
     }
@@ -23,31 +25,26 @@ public class Setting {
         this.id = id;
     }
 
-    public String getWebhook() {
-        return webhook;
+    // Setter for a setting based on the enum
+    public void setSetting(Settings setting, String value) {
+        settings.put(setting, value);
     }
 
-    public void setWebhook(String webhook) {
-        this.webhook = webhook;
+    // Getter for a setting based on the enum
+    public String getSetting(Settings setting) {
+        return settings.get(setting);
     }
 
-    public String getAssigned() {
-        return assigned;
-    }
-
-    public void setAssigned(String assigned) {
-        this.assigned = assigned;
-    }
-
-
-
-    // Convert to JSON
+    // Convert the settings to a JSONObject
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
         json.put("id", id);
-        json.put("webhook", webhook);
-        json.put("assigned", assigned);
-        return json;
 
+        // Add each setting in the enum map to the JSON
+        for (Map.Entry<Settings, String> entry : settings.entrySet()) {
+            json.put(entry.getKey().getSetting(), entry.getValue());
+        }
+
+        return json;
     }
 }

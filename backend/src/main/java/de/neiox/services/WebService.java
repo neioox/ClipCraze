@@ -14,7 +14,7 @@ import io.javalin.http.staticfiles.Location;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import kong.unirest.json.JSONObject as KongJSONObject;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -573,8 +573,18 @@ public class WebService {
         app.post("/api/addSettings", ctx -> {
             String webhook = ctx.formParam("webhook");
             String assignedUser = ctx.formParam("id");
+            int dayPeriodeOfClip = Integer.parseInt(ctx.formParam("dayPeriodeOfClip"));
+            if (dayPeriodeOfClip < 1) {
+                ctx.status(400).result("{\"error\": \"Day period must be greater than 0\"}");
+                return;
+            }
+            if(assignedUser == null){
+                ctx.status(400).result("{\"error\": \"User ID is null\"}");
+                return;
+            }
 
-            mongoDB.createSettings(webhook, assignedUser);
+
+            mongoDB.createSettings(webhook, assignedUser, dayPeriodeOfClip);
 
 
             ctx.result("{\"response\": \"  inserted Settings sucesfully \"}");
@@ -584,18 +594,19 @@ public class WebService {
         app.get("/api/getSettings/{id}", ctx -> {
             String assignedUser = ctx.pathParam("id");
             System.out.println("Requested ID: " + assignedUser);
-            JSONObject jsonObject = new JSONObject();
+            kong.unirest.json.JSONObject se = new kong.unirest.json.JSONObject();
 
             Setting setting = mongoDB.getSettingsFromUser(assignedUser);
 
             if(setting != null){
 
-                String webhook = setting.getWebhook();
-                jsonObject.put("webhook", webhook);
-
+                se = setting.toJson();
+                ctx.result(se.toString());
+            }else{
+                ctx.status(500).result("{\"error\": \"No settings found for user\"}");
             }
 
-            ctx.result(jsonObject.toString());
+
         });
 
 

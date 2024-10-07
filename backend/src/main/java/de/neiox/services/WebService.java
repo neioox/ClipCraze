@@ -14,13 +14,19 @@ import io.javalin.http.staticfiles.Location;
 import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import kong.unirest.json.JSONObject as KongJSONObject;
+
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -273,14 +279,56 @@ public class WebService {
             String filename = ctx.pathParam("filename");
             Path file = Paths.get("Clips", filename);
 
-            if (Files.exists(file) && Files.isReadable(file)) {
-                byte[] bytes = Files.readAllBytes(file);
-                ctx.result(bytes);
-                ctx.header("Content-Disposition", "attachment; filename=\"" + file.getFileName() + "\"");
+            if (Files.exists(file) && Files.isReadable(file)){
+                try {
+                    AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(file, StandardOpenOption.READ);
+                    ctx.header("Content-Disposition", "attachment; filename=\"" + file.getFileName() + "\"");
+                    ctx.result(new InputStream() {
+                        private long position = 0;
+
+                        @Override
+                        public int read() throws IOException {
+                            ByteBuffer buffer = ByteBuffer.allocate(1);
+                            Future<Integer> result = fileChannel.read(buffer, position);
+                            try {
+                                int bytesRead = result.get();
+                                if (bytesRead == -1) {
+                                    return -1; // End of stream
+                                }
+                                position++;
+                                return buffer.get(0) & 0xFF;
+                            } catch (InterruptedException | ExecutionException e) {
+                                throw new IOException("Error reading file", e);
+                            }
+                        }
+
+                        @Override
+                        public int read(byte[] b, int off, int len) throws IOException {
+                            ByteBuffer buffer = ByteBuffer.allocate(len);
+                            Future<Integer> result = fileChannel.read(buffer, position);
+                            try {
+                                int bytesRead = result.get();
+                                if (bytesRead == -1) {
+                                    return -1; // End of stream
+                                }
+                                buffer.flip();
+                                buffer.get(b, off, bytesRead);
+                                position += bytesRead;
+                                return bytesRead;
+                            } catch (InterruptedException | ExecutionException e) {
+                                throw new IOException("Error reading file", e);
+                            }
+                        }
+                    });
+                } catch (IOException e) {
+                    ctx.status(500).result("Error reading file");
+                }
             } else {
-                ctx.status(404);
+                ctx.status(404).result("File not found");
             }
         });
+
+
 
         app.get("/api/getsubtitels/{filename}", ctx -> {
             String filename = ctx.pathParam("filename");

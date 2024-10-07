@@ -8,10 +8,6 @@
   <div>
     <h2 class="text-xl font-bold mb-4">Streamer List</h2>
 
-
-
-
-
     <!-- Table to display streamers -->
     <table class="w-full rounded-lg overflow-hidden shadow-lg">
   <thead class="bg-gray-100">

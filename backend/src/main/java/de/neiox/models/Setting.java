@@ -9,11 +9,29 @@ import java.util.Map;
 public class Setting {
     private String id;
     private Map<Settings, String> settings;
+    private String webhook;
+
+
 
     // Constructor
     public Setting(String id) {
         this.id = id;
         this.settings = new EnumMap<>(Settings.class);
+    }
+
+
+    public Setting(String id, String webhook) {
+        this.id = id;
+        this.settings = new EnumMap<>(Settings.class);
+        this.webhook = webhook;
+    }
+
+    public String getWebhook() {
+        return webhook;
+    }
+
+    public void setWebhook(String webhook) {
+        this.webhook = webhook;
     }
 
     // Getters and setters for id

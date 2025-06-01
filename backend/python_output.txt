@@ -1,5 +1,0 @@
-Loading ai models...
-Whisper model loaded.
- * Serving Flask app
-  'app'
- * Debug mode: off

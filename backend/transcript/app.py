@@ -27,7 +27,7 @@ def load_models():
 
     print("Loading ai models...")
     print("Loading Whisper ai... model: " + whisper_model)
-    model = stable_whisper.load_model(whisper_model)
+    model = stable_whisper.load_model(whisper_model, device="cuda")
     print("Whisper model loaded.")
     print("Loading Ollama model: " + ollama_model)
 

@@ -3,5 +3,5 @@ Flask_Cors==3.0.10
 langchain==0.1.2
 moviepy==1.0.3
 stable_ts==2.13.7
-Werkzeug===2.2.2
+Werkzeug===3.0.6
 scikit-image==0.21.0
